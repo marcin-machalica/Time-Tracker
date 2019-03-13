@@ -4,14 +4,14 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
+import javafx.util.StringConverter;
 import machalica.marcin.timetracker.model.Activity;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 public class MainController {
@@ -24,7 +24,7 @@ public class MainController {
     @FXML
     private TableColumn infoColumn;
     @FXML
-    private TextField dateInput;
+    private DatePicker dateInput;
     @FXML
     private TextField timeInput;
     @FXML
@@ -33,6 +33,7 @@ public class MainController {
     private Button addActivityButton;
 
     private ObservableList<Activity> activities = FXCollections.observableArrayList();
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML
     private void initialize() {
@@ -41,22 +42,65 @@ public class MainController {
         infoColumn.setCellValueFactory(new PropertyValueFactory<Activity, String>("info"));
 
         activityTable.setItems(activities);
-        
+
+        dateInput.setPromptText("DD/MM/YYYY");
+        timeInput.setPromptText("00:00");
+        setupDateInputConverter();
+        setupDateInputListener();
         setupAddActivityButtonListeners();
     }
 
+    private void setupDateInputListener() {
+        dateInput.setOnKeyReleased(k -> {
+            if(k.getCode() == KeyCode.ENTER) {
+                dateInput.show();
+            }
+        });
+    }
+
+    private void setupDateInputConverter() {
+        dateInput.setConverter(new StringConverter<LocalDate>() {
+            @Override
+            public String toString(LocalDate localDate) {
+                return localDate == null ? null : dateTimeFormatter.format(localDate);
+            }
+
+            @Override
+            public LocalDate fromString(String dateString) {
+                if(dateString == null || dateString.trim().isEmpty())
+                {
+                    return null;
+                }
+                return LocalDate.parse(dateString, dateTimeFormatter);
+            }
+        });
+    }
+
     private void addActivity() {
-        if(dateInput.getText().equals("") && timeInput.getText().equals("") && infoInput.getText().equals("")) {
+        LocalDate localDate = dateInput.getValue();
+        String time = timeInput.getText();
+        String info = infoInput.getText();
+
+        if (localDate == null) {
+            dateInput.requestFocus();
+            return;
+        } else if (time.equals("") || !time.matches("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+            timeInput.requestFocus();
+            return;
+        } else if (info.equals("")){
+            infoInput.requestFocus();
             return;
         }
 
+        String date = dateTimeFormatter.format(localDate);
+
         activities.add(new Activity(
-                        dateInput.getText(),
-                        timeInput.getText(),
-                        infoInput.getText()
+                        date,
+                        time,
+                        info
         ));
 
-        dateInput.clear();
+        dateInput.setValue(null);
         timeInput.clear();
         infoInput.clear();
         dateInput.requestFocus();

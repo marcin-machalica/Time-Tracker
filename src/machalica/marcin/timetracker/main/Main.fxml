@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -23,7 +24,7 @@
       </TableView>
       <HBox spacing="5.0">
          <children>
-            <TextField fx:id="dateInput" promptText="Date" />
+            <DatePicker fx:id="dateInput" promptText="Date" />
             <TextField fx:id="timeInput" promptText="Time" />
             <TextField fx:id="infoInput" promptText="Info" />
             <Button fx:id="addActivityButton" minWidth="60.0" mnemonicParsing="false" text="Add">
