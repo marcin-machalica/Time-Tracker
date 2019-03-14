@@ -4,6 +4,7 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -40,6 +41,15 @@
          <VBox.margin>
             <Insets />
          </VBox.margin>
+      </HBox>
+      <HBox alignment="CENTER">
+         <children>
+            <Label fx:id="warningLabel" textFill="#cc3300">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </Label>
+         </children>
       </HBox>
    </children>
 </VBox>
