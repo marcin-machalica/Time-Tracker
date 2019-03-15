@@ -6,12 +6,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
 import machalica.marcin.timetracker.model.Activity;
 
@@ -112,10 +114,13 @@ public class MainController {
         editInfoInput.setPromptText("Info");
         editInfoInput.setText(activity.getInfo());
 
-        final Label editWarningLabel = new Label();
+        final Label editWarningLabel = new Label("");
+        editWarningLabel.setTextFill(Color.valueOf("#cc3300"));
+        final HBox editWarningLabelHBox = new HBox(editWarningLabel);
+        editWarningLabelHBox.setAlignment(Pos.CENTER);
 
         final HBox editInputsHBox = new HBox(10, editDateInput, editTimeInput, editInfoInput);
-        final VBox editVBox = new VBox(10, editInputsHBox, editWarningLabel);
+        final VBox editVBox = new VBox(10, editInputsHBox, editWarningLabelHBox);
         dialog.getDialogPane().setContent(editVBox);
 
         final ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.YES);
