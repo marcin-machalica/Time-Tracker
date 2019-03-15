@@ -9,14 +9,22 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
+import machalica.marcin.timetracker.datapersistence.DataPersistenceStrategy;
+import machalica.marcin.timetracker.datapersistence.TextFileStrategy;
 import machalica.marcin.timetracker.model.Activity;
+import org.controlsfx.control.Notifications;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -44,6 +52,7 @@ public class MainController {
     private Label warningLabel;
 
     private ObservableList<Activity> activities = FXCollections.observableArrayList();
+    private DataPersistenceStrategy dataPersistenceObject;
 
     @FXML
     private void initialize() {
@@ -54,6 +63,15 @@ public class MainController {
 
         activityTable.setItems(activities);
 
+        dataPersistenceObject = new TextFileStrategy();
+        Main.setOnExit(() -> {
+            try {
+                dataPersistenceObject.save(activities);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
         setupDateInputConverter(dateInput);
         setupDateInputListener(dateInput);
         setupAddActivityButtonListeners();
@@ -61,6 +79,46 @@ public class MainController {
         dateInput.setPromptText("DD/MM/YYYY");
         timeInput.setPromptText("00:00");
         Platform.runLater(() -> dateInput.requestFocus());
+    }
+
+    @FXML
+    private void saveData() {
+        Image img = null;
+        try {
+            img = new Image(getClass().getResource("/saveicon.png").toURI().toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        Notifications notificationBuilder = Notifications.create()
+                .title("Data saved")
+                .text("Saved data to " + dataPersistenceObject.toString() + ".")
+                .graphic(new ImageView(img))
+                .hideAfter(Duration.seconds(5))
+                .position(Pos.BOTTOM_RIGHT);
+        notificationBuilder.darkStyle();
+        notificationBuilder.show();
+        try {
+            dataPersistenceObject.save(activities);
+        } catch (IOException e) {
+            warningLabel.setText(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void showAbout() {
+        final Dialog<Activity> dialog = new Dialog<>();
+        dialog.setTitle("About");
+
+        final Label aboutLabel = new Label();
+        aboutLabel.setText("Time Tracker created by Marcin Machalica\nIcons by icons8 (https://icons8.com)");
+        final HBox aboutLabelHBox = new HBox(aboutLabel);
+        aboutLabelHBox.setAlignment(Pos.CENTER);
+
+        dialog.getDialogPane().setContent(aboutLabelHBox);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
+
+        dialog.show();
     }
 
     private void setupDateInputListener(DatePicker dateInput) {
@@ -114,7 +172,7 @@ public class MainController {
         editInfoInput.setPromptText("Info");
         editInfoInput.setText(activity.getInfo());
 
-        final Label editWarningLabel = new Label("");
+        final Label editWarningLabel = new Label();
         editWarningLabel.setTextFill(Color.valueOf("#cc3300"));
         final HBox editWarningLabelHBox = new HBox(editWarningLabel);
         editWarningLabelHBox.setAlignment(Pos.CENTER);

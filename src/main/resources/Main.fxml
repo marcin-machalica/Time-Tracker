@@ -5,6 +5,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -13,6 +16,20 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="machalica.marcin.timetracker.main.MainController">
    <children>
+      <MenuBar>
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#saveData" text="Save" />
+            </items>
+          </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+               <items>
+                  <MenuItem mnemonicParsing="false" onAction="#showAbout" text="About" />
+               </items>
+            </Menu>
+        </menus>
+      </MenuBar>
       <TableView fx:id="activityTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
         <columns>
           <TableColumn fx:id="dateColumn" prefWidth="75.0" text="Date" />
