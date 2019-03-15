@@ -31,6 +31,8 @@ public class Activity {
         return date.get();
     }
 
+    public LocalDate getLocalDate() { return LocalDate.parse(getDate(), DATE_TIME_FORMATTER); }
+
     public void setDate(LocalDate localDate) throws DateTimeException, IllegalArgumentException {
         if(localDate == null) { throw new IllegalArgumentException("LocalDate object cannot be null"); }
         String date = DATE_TIME_FORMATTER.format(localDate);
@@ -54,6 +56,6 @@ public class Activity {
     public void setInfo(String info) throws IllegalArgumentException {
         if(info == null) { throw new IllegalArgumentException("Info cannot be null"); }
         if (info.trim().equals("")) { throw new IllegalArgumentException("Info cannot be empty"); }
-        this.info.set(info);
+        this.info.set(info.trim());
     }
 }

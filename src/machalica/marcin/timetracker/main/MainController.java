@@ -1,18 +1,23 @@
 package machalica.marcin.timetracker.main;
 
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import machalica.marcin.timetracker.model.Activity;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class MainController {
     @FXML
@@ -47,16 +52,16 @@ public class MainController {
 
         activityTable.setItems(activities);
 
-        setupDateInputConverter();
-        setupDateInputListener();
+        setupDateInputConverter(dateInput);
+        setupDateInputListener(dateInput);
         setupAddActivityButtonListeners();
 
         dateInput.setPromptText("DD/MM/YYYY");
         timeInput.setPromptText("00:00");
-        dateInput.requestFocus();
+        Platform.runLater(() -> dateInput.requestFocus());
     }
 
-    private void setupDateInputListener() {
+    private void setupDateInputListener(DatePicker dateInput) {
         dateInput.setOnKeyReleased(k -> {
             if(k.getCode() == KeyCode.ENTER) {
                 dateInput.show();
@@ -84,12 +89,91 @@ public class MainController {
                 setGraphic(actionButtonsHBox);
 
                 deleteButton.setOnAction(e -> getTableView().getItems().remove(activity));
-                editButton.setOnAction(event -> System.out.println("editing"));
+                editButton.setOnAction(e -> editActivity(activity));
             }
         });
     }
 
-    private void setupDateInputConverter() {
+    private void editActivity(Activity activity) {
+        final Dialog<Activity> dialog = new Dialog<>();
+        dialog.setTitle("Edit");
+
+        final DatePicker editDateInput = new DatePicker();
+        editDateInput.setPromptText("DD/MM/YYYY");
+        editDateInput.getEditor().setText(activity.getDate());
+        setupDateInputConverter(editDateInput);
+        setupDateInputListener(editDateInput);
+
+        final TextField editTimeInput = new TextField();
+        editTimeInput.setPromptText("00:00");
+        editTimeInput.setText(activity.getTime());
+
+        final TextField editInfoInput = new TextField();
+        editInfoInput.setPromptText("Info");
+        editInfoInput.setText(activity.getInfo());
+
+        final Label editWarningLabel = new Label();
+
+        final HBox editInputsHBox = new HBox(10, editDateInput, editTimeInput, editInfoInput);
+        final VBox editVBox = new VBox(10, editInputsHBox, editWarningLabel);
+        dialog.getDialogPane().setContent(editVBox);
+
+        final ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.YES);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+        final Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
+        final Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+
+        saveButton.addEventFilter(ActionEvent.ACTION, e -> {
+            if (editDateInput.getValue() == null) {
+                editDateInput.requestFocus();
+                e.consume();
+            } else if (editTimeInput.getText().equals("") || !editTimeInput.getText().matches(Activity.TIME_PATTERN)) {
+                editTimeInput.requestFocus();
+                e.consume();
+            } else if (editInfoInput.getText().equals("")){
+                editInfoInput.requestFocus();
+                e.consume();
+            }
+        });
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                LocalDate localDate = editDateInput.getValue();
+                String time = editTimeInput.getText();
+                String info = editInfoInput.getText();
+
+                try {
+                    return new Activity(localDate, time, info);
+                } catch (DateTimeException | IllegalArgumentException ex) {
+                    editWarningLabel.setText(ex.getMessage());
+                }
+            }
+            return null;
+        });
+
+        dialog.getDialogPane().addEventFilter(KeyEvent.KEY_PRESSED, k -> {
+                    if (k.getCode() == KeyCode.ENTER) {
+                        if (cancelButton.isFocused()) {
+                            dialog.close();
+                        } else if (!saveButton.isFocused()){
+                            k.consume();
+                        }
+                    }
+                });
+
+        Platform.runLater(() -> editDateInput.requestFocus());
+        Optional<Activity> result = dialog.showAndWait();
+
+        result.ifPresent(editedActivity -> {
+            editWarningLabel.setText("");
+            activity.setDate(editedActivity.getLocalDate());
+            activity.setTime(editedActivity.getTime());
+            activity.setInfo(editedActivity.getInfo());
+            activityTable.refresh();
+        });
+    }
+
+    private void setupDateInputConverter(DatePicker dateInput) {
         dateInput.setConverter(new StringConverter<LocalDate>() {
             @Override
             public String toString(LocalDate localDate) {
@@ -98,8 +182,7 @@ public class MainController {
 
             @Override
             public LocalDate fromString(String dateString) {
-                if(dateString == null || dateString.trim().isEmpty())
-                {
+                if(dateString == null || dateString.trim().isEmpty()) {
                     return null;
                 }
                 return LocalDate.parse(dateString, Activity.DATE_TIME_FORMATTER);
