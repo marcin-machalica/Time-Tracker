@@ -19,6 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import machalica.marcin.timetracker.datapersistence.DataPersistenceStrategy;
+import machalica.marcin.timetracker.datapersistence.SerializationStrategy;
 import machalica.marcin.timetracker.datapersistence.TextFileStrategy;
 import machalica.marcin.timetracker.model.Activity;
 import org.controlsfx.control.Notifications;
@@ -64,7 +65,8 @@ public class MainController {
 
         activityTable.setItems(activities);
 
-        dataPersistenceObject = new TextFileStrategy();
+//        dataPersistenceObject = new TextFileStrategy();
+        dataPersistenceObject = new SerializationStrategy();
         loadData();
 
         Main.setOnExit(() -> {
@@ -100,16 +102,19 @@ public class MainController {
         ObservableList<Activity> activitiesTemp = null;
         try {
             activitiesTemp = dataPersistenceObject.load();
-        } catch (FileNotFoundException fnnEx) {
+        } catch (FileNotFoundException ex) {
             Platform.runLater(() -> {
-                System.out.println(fnnEx.getMessage());
-                showNotification(10, "Load error", fnnEx.getMessage(), "/errornotification.png");
+                System.out.println(ex.getMessage());
+                showNotification(10, "Load error", ex.getMessage(), "/errornotification.png");
             });
         } catch (IllegalArgumentException | IOException ex) {
             Platform.runLater(() -> {
                 ex.printStackTrace();
                 showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
             });
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+            showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
         }
 
         if(activitiesTemp != null && !activitiesTemp.isEmpty()) {

@@ -7,5 +7,5 @@ import java.io.IOException;
 
 public interface DataPersistenceStrategy {
     void save(ObservableList<Activity> observableList) throws IOException;
-    ObservableList<Activity> load() throws IOException;
+    ObservableList<Activity> load() throws IOException, ClassNotFoundException;
 }
