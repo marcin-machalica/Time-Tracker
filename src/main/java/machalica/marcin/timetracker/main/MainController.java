@@ -93,12 +93,6 @@ public class MainController {
 
     private void setDataPersistenceOptionAccordingToSettings() {
         switch (Settings.getDataPersistenceDefaultOption()) {
-            case TEXT_FILE:
-                dataPersistenceObject = new TextFileStrategy();
-                Platform.runLater(() -> {
-                    dataPersistenceOptionTextFile.setSelected(true);
-                });
-                break;
             case SERIALIZATION:
                 dataPersistenceObject = new SerializationStrategy();
                 Platform.runLater(() -> {
@@ -111,6 +105,7 @@ public class MainController {
                     dataPersistenceOptionDatabase.setSelected(true);
                 });
                 break;
+            case TEXT_FILE:
             default:
                 dataPersistenceObject = new TextFileStrategy();
                 Platform.runLater(() -> {
@@ -167,6 +162,7 @@ public class MainController {
             });
         } finally {
             setDataPersistenceOptionAccordingToSettings();
+            saveSettings();
         }
     }
 
