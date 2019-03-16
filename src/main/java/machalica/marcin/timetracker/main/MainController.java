@@ -21,6 +21,8 @@ import javafx.util.StringConverter;
 import machalica.marcin.timetracker.datapersistence.DataPersistenceStrategy;
 import machalica.marcin.timetracker.datapersistence.SerializationStrategy;
 import machalica.marcin.timetracker.datapersistence.TextFileStrategy;
+import machalica.marcin.timetracker.helper.DataPersistenceOption;
+import machalica.marcin.timetracker.helper.Settings;
 import machalica.marcin.timetracker.model.Activity;
 import org.controlsfx.control.Notifications;
 
@@ -52,6 +54,12 @@ public class MainController {
     private Button addActivityButton;
     @FXML
     private Label warningLabel;
+    @FXML
+    private RadioMenuItem dataPersistenceOptionTextFile;
+    @FXML
+    private RadioMenuItem dataPersistenceOptionSerialization;
+    @FXML
+    private RadioMenuItem dataPersistenceOptionDatabase;
 
     private ObservableList<Activity> activities = FXCollections.observableArrayList();
     private DataPersistenceStrategy dataPersistenceObject;
@@ -65,16 +73,13 @@ public class MainController {
 
         activityTable.setItems(activities);
 
-//        dataPersistenceObject = new TextFileStrategy();
-        dataPersistenceObject = new SerializationStrategy();
+        setDataPersistenceOptionMenuItemsOnAction();
+        loadSettings();
         loadData();
 
         Main.setOnExit(() -> {
-            try {
-                dataPersistenceObject.save(activities);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            saveSettings();
+            saveData();
         });
 
         setupDateInputConverter(dateInput);
@@ -84,6 +89,94 @@ public class MainController {
         dateInput.setPromptText("DD/MM/YYYY");
         timeInput.setPromptText("00:00");
         Platform.runLater(() -> dateInput.requestFocus());
+    }
+
+    private void setDataPersistenceOptionAccordingToSettings() {
+        switch (Settings.getDataPersistenceDefaultOption()) {
+            case TEXT_FILE:
+                dataPersistenceObject = new TextFileStrategy();
+                Platform.runLater(() -> {
+                    dataPersistenceOptionTextFile.setSelected(true);
+                });
+                break;
+            case SERIALIZATION:
+                dataPersistenceObject = new SerializationStrategy();
+                Platform.runLater(() -> {
+                    dataPersistenceOptionSerialization.setSelected(true);
+                });
+                break;
+            case DATABASE:
+                System.out.println("database");
+                Platform.runLater(() -> {
+                    dataPersistenceOptionDatabase.setSelected(true);
+                });
+                break;
+            default:
+                dataPersistenceObject = new TextFileStrategy();
+                Platform.runLater(() -> {
+                    dataPersistenceOptionTextFile.setSelected(true);
+                });
+                break;
+        }
+    }
+
+    private void setDataPersistenceOptionMenuItemsOnAction() {
+        dataPersistenceOptionTextFile.setOnAction(e -> {
+            Platform.runLater(() -> {
+                dataPersistenceObject = new TextFileStrategy();
+                Settings.setDataPersistenceDefaultOption(DataPersistenceOption.TEXT_FILE);
+                saveSettings();
+            });
+        });
+        dataPersistenceOptionSerialization.setOnAction(e -> {
+            Platform.runLater(() -> {
+                dataPersistenceObject = new SerializationStrategy();
+                Settings.setDataPersistenceDefaultOption(DataPersistenceOption.SERIALIZATION);
+                saveSettings();
+            });
+        });
+        dataPersistenceOptionDatabase.setOnAction(e -> {
+            Platform.runLater(() -> {
+                System.out.println("database");
+                Settings.setDataPersistenceDefaultOption(DataPersistenceOption.DATABASE);
+                saveSettings();
+            });
+        });
+    }
+
+    private void loadSettings() {
+        try {
+            Settings.loadSettings();
+            Platform.runLater(() -> {
+                showNotification(5,"Settings loaded", "Successfully loaded settings.", "/loadiconsettings.png");
+            });
+        } catch (FileNotFoundException ex) {
+            Platform.runLater(() -> {
+                System.out.println(ex.getMessage());
+                showNotification(10, "Load error", ex.getMessage(), "/errornotification.png");
+            });
+        } catch (ClassNotFoundException ex) {
+            Platform.runLater(() -> {
+                ex.printStackTrace();
+                showNotification(10, "Load error", "Cannot load settings.", "/errornotification.png");
+            });
+        } catch (IOException ex) {
+            Platform.runLater(() -> {
+                ex.printStackTrace();
+                showNotification(10, "Load error", "Cannot load settings.", "/errornotification.png");
+            });
+        } finally {
+            setDataPersistenceOptionAccordingToSettings();
+        }
+    }
+
+    private void saveSettings() {
+        try {
+            Settings.saveSettings();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            showNotification(10, "Save error", "Error during saving settings", "/errornotification.png");
+        }
     }
 
     @FXML

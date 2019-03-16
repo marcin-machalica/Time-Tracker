@@ -43,7 +43,7 @@ public class SerializationStrategy implements DataPersistenceStrategy {
                         ash.getInfo()
                 ));
             }
-        } catch (FileNotFoundException fnnEx) { throw new FileNotFoundException("Serialized Data File (" + FINAL_FILE_NAME + ") doesn't exist."); }
+        } catch (FileNotFoundException ex) { throw new FileNotFoundException("Serialized Data File (" + FINAL_FILE_NAME + ") doesn't exist."); }
 
         return observableList;
     }

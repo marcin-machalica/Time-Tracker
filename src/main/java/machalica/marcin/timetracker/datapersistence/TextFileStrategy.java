@@ -61,7 +61,7 @@ public class TextFileStrategy implements DataPersistenceStrategy {
                 }
             }
             return observableList;
-        } catch (FileNotFoundException fnnEx) { throw new FileNotFoundException("Text File (" + FINAL_FILE_NAME + ") doesn't exist."); }
+        } catch (FileNotFoundException ex) { throw new FileNotFoundException("Text File (" + FINAL_FILE_NAME + ") doesn't exist."); }
     }
 
     @Override
