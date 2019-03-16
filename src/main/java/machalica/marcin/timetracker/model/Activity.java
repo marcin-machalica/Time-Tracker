@@ -57,6 +57,7 @@ public class Activity {
     public void setInfo(String info) throws IllegalArgumentException {
         if(info == null) { throw new IllegalArgumentException("Info cannot be null"); }
         if (info.trim().equals("")) { throw new IllegalArgumentException("Info cannot be empty"); }
+        if (info.contains(";")) { throw new IllegalArgumentException("Info cannot contain character: \";\""); }
         this.info.set(info.trim());
     }
 }
