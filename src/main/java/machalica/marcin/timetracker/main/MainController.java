@@ -23,6 +23,7 @@ import machalica.marcin.timetracker.datapersistence.TextFileStrategy;
 import machalica.marcin.timetracker.model.Activity;
 import org.controlsfx.control.Notifications;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.DateTimeException;
@@ -64,6 +65,8 @@ public class MainController {
         activityTable.setItems(activities);
 
         dataPersistenceObject = new TextFileStrategy();
+        loadData();
+
         Main.setOnExit(() -> {
             try {
                 dataPersistenceObject.save(activities);
@@ -83,25 +86,43 @@ public class MainController {
 
     @FXML
     private void saveData() {
-        Image img = null;
-        try {
-            img = new Image(getClass().getResource("/saveicon.png").toURI().toString());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        Notifications notificationBuilder = Notifications.create()
-                .title("Data saved")
-                .text("Saved data to " + dataPersistenceObject.toString() + ".")
-                .graphic(new ImageView(img))
-                .hideAfter(Duration.seconds(5))
-                .position(Pos.BOTTOM_RIGHT);
-        notificationBuilder.darkStyle();
-        notificationBuilder.show();
         try {
             dataPersistenceObject.save(activities);
-        } catch (IOException e) {
-            warningLabel.setText(e.getMessage());
-            e.printStackTrace();
+            showNotification(5, "Data saved","Successfully saved data to \n" + dataPersistenceObject.toString() + ".", "/saveicon.png");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
+        }
+    }
+
+    @FXML
+    private void loadData() {
+        ObservableList<Activity> activitiesTemp = null;
+        try {
+            activitiesTemp = dataPersistenceObject.load();
+        } catch (FileNotFoundException fnnEx) {
+            Platform.runLater(() -> {
+                System.out.println(fnnEx.getMessage());
+                showNotification(10, "Load error", fnnEx.getMessage(), "/errornotification.png");
+            });
+        } catch (IllegalArgumentException | IOException ex) {
+            Platform.runLater(() -> {
+                ex.printStackTrace();
+                showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
+            });
+        }
+
+        if(activitiesTemp != null && !activitiesTemp.isEmpty()) {
+            activities.setAll(activitiesTemp);
+            Platform.runLater(() -> {
+                showNotification(5,"Data loaded", "Successfully loaded data from \n" + dataPersistenceObject.toString() + ".", "/loadicon.png");
+            });
+        } else if(activitiesTemp != null && activitiesTemp.isEmpty()) {
+            Platform.runLater(() -> {
+                String errorMsg = "No data found in \n" + dataPersistenceObject.toString() + ".";
+                System.out.println(errorMsg);
+                showNotification(10, "Load error", errorMsg, "/errornotification.png");
+            });
         }
     }
 
@@ -119,6 +140,23 @@ public class MainController {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
 
         dialog.show();
+    }
+
+    private void showNotification(int duration, String title, String text, String imgPath) {
+        Image img = null;
+        try {
+            img = new Image(getClass().getResource(imgPath).toURI().toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        Notifications notificationBuilder = Notifications.create()
+                .title(title)
+                .text(text)
+                .graphic(new ImageView(img))
+                .hideAfter(Duration.seconds(duration))
+                .position(Pos.BOTTOM_RIGHT);
+        notificationBuilder.darkStyle();
+        notificationBuilder.show();
     }
 
     private void setupDateInputListener(DatePicker dateInput) {
@@ -193,7 +231,7 @@ public class MainController {
             } else if (editTimeInput.getText().equals("") || !editTimeInput.getText().matches(Activity.TIME_PATTERN)) {
                 editTimeInput.requestFocus();
                 e.consume();
-            } else if (editInfoInput.getText().equals("")){
+            } else if (editInfoInput.getText().trim().equals("") || editInfoInput.getText().contains(";")) {
                 editInfoInput.requestFocus();
                 e.consume();
             }
@@ -264,7 +302,7 @@ public class MainController {
         } else if (time.equals("") || !time.matches(Activity.TIME_PATTERN)) {
             timeInput.requestFocus();
             return;
-        } else if (info.equals("")){
+        } else if (info.trim().equals("") || info.contains(";")) {
             infoInput.requestFocus();
             return;
         }

@@ -21,6 +21,7 @@ public class Activity {
         String date = DATE_TIME_FORMATTER.format(localDate);
         if (time.equals("") || !time.matches(TIME_PATTERN)) { throw new IllegalArgumentException("Wrong time format"); }
         if (info.trim().equals("")) { throw new IllegalArgumentException("Info cannot be empty"); }
+        if (info.contains(";")) { throw new IllegalArgumentException("Info cannot contain character: \";\""); }
 
         this.date = new SimpleStringProperty(date);
         this.time = new SimpleStringProperty(time);
