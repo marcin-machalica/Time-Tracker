@@ -2,6 +2,7 @@ package machalica.marcin.timetracker.main;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -23,6 +24,7 @@ import machalica.marcin.timetracker.helper.DataPersistenceOption;
 import machalica.marcin.timetracker.helper.Settings;
 import machalica.marcin.timetracker.model.Activity;
 import org.controlsfx.control.Notifications;
+import org.controlsfx.dialog.CommandLinksDialog;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -65,6 +67,8 @@ public class MainController {
 
     @FXML
     private void initialize() {
+        Main.setOnExit(() -> onExit());
+
         dateColumn.setCellValueFactory(new PropertyValueFactory<Activity, String>("date"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<Activity, String>("time"));
         infoColumn.setCellValueFactory(new PropertyValueFactory<Activity, String>("info"));
@@ -76,11 +80,6 @@ public class MainController {
         loadSettings();
         loadData();
 
-        Main.setOnExit(() -> {
-            saveSettings();
-            saveData();
-        });
-
         setupDateInputConverter(dateInput);
         setupDateInputListener(dateInput);
         setupAddActivityButtonListeners();
@@ -88,6 +87,37 @@ public class MainController {
         dateInput.setPromptText("DD/MM/YYYY");
         timeInput.setPromptText("00:00");
         Platform.runLater(() -> dateInput.requestFocus());
+    }
+
+    private boolean onExit() {
+        CommandLinksDialog dialog = new CommandLinksDialog();
+        dialog.setTitle("Do you want to save?");
+
+        final ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.YES);
+        final ButtonType discardButtonType = new ButtonType("Discard", ButtonBar.ButtonData.NO);
+        dialog.getDialogPane().getButtonTypes().setAll(saveButtonType, discardButtonType, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> dialogButton);
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        SimpleBooleanProperty areSettingsSaved = new SimpleBooleanProperty(false);
+        SimpleBooleanProperty isDataSaved = new SimpleBooleanProperty(false);
+        SimpleBooleanProperty isDiscarded = new SimpleBooleanProperty(false);
+
+        result.ifPresent(clickedButton -> {
+            if(clickedButton == saveButtonType) {
+                areSettingsSaved.set(saveSettings());
+                isDataSaved.set(saveData());
+            } else if(clickedButton == discardButtonType) {
+                isDiscarded.set(true);
+            }
+        });
+
+        if(isDiscarded.get() || (areSettingsSaved.get() && isDataSaved.get())) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @FXML
@@ -210,20 +240,26 @@ public class MainController {
         }
     }
 
-    private void saveSettings() {
+    private boolean saveSettings() {
+        boolean isSaved = false;
         try {
             Settings.saveSettings();
+            isSaved = true;
         } catch (IOException ex) {
             ex.printStackTrace();
             showNotification(10, "Save error", "Error during saving settings", "/errornotification.png");
+        } finally {
+            return isSaved;
         }
     }
 
     @FXML
-    private void saveData() {
+    private boolean saveData() {
+        boolean isSaved = false;
         try {
             dataPersistenceObject.save(activities);
             showNotification(5, "Data saved","Successfully saved data to \n" + dataPersistenceObject.toString() + ".", "/saveicon.png");
+            isSaved = true;
         } catch (IOException ex) {
             ex.printStackTrace();
             showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
@@ -237,6 +273,8 @@ public class MainController {
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
             showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
+        } finally {
+            return isSaved;
         }
     }
 

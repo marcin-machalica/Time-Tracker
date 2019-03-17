@@ -7,6 +7,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.function.BooleanSupplier;
+
 public class Main extends Application {
     public static Stage mainStage;
 
@@ -19,11 +21,15 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    public static void setOnExit(Runnable runnable) {
+    public static void setOnExit(BooleanSupplier booleanSupplier) {
         mainStage.setOnCloseRequest(e -> {
-            runnable.run();
-            Platform.exit();
-            System.exit(0);
+            boolean shouldExit = booleanSupplier.getAsBoolean();
+            if(shouldExit) {
+                Platform.exit();
+                System.exit(0);
+            } else {
+                e.consume();
+            }
         });
     }
 
