@@ -18,10 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import machalica.marcin.timetracker.datapersistence.CsvStrategy;
-import machalica.marcin.timetracker.datapersistence.DataPersistenceStrategy;
-import machalica.marcin.timetracker.datapersistence.SerializationStrategy;
-import machalica.marcin.timetracker.datapersistence.TextFileStrategy;
+import machalica.marcin.timetracker.datapersistence.*;
 import machalica.marcin.timetracker.helper.DataPersistenceOption;
 import machalica.marcin.timetracker.helper.Settings;
 import machalica.marcin.timetracker.model.Activity;
@@ -30,6 +27,7 @@ import org.controlsfx.control.Notifications;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -146,7 +144,7 @@ public class MainController {
                 });
                 break;
             case DATABASE:
-                System.out.println("database");
+                dataPersistenceObject = new DatabaseStrategy();
                 Platform.runLater(() -> {
                     dataPersistenceOptionDatabase.setSelected(true);
                 });
@@ -178,7 +176,7 @@ public class MainController {
         });
         dataPersistenceOptionDatabase.setOnAction(e -> {
             Platform.runLater(() -> {
-                System.out.println("database");
+                dataPersistenceObject = new DatabaseStrategy();
                 Settings.setDataPersistenceDefaultOption(DataPersistenceOption.DATABASE);
                 saveSettings();
             });
@@ -229,6 +227,16 @@ public class MainController {
         } catch (IOException ex) {
             ex.printStackTrace();
             showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+            showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            System.out.println(ex.getNextException());
+            showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+            showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
         }
     }
 
@@ -248,8 +256,16 @@ public class MainController {
                 showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
             });
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-            showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
+            Platform.runLater(() -> {
+                ex.printStackTrace();
+                showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
+            });
+        } catch (SQLException ex) {
+            Platform.runLater(() -> {
+                ex.printStackTrace();
+                System.out.println(ex.getNextException());
+                showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
+            });
         }
 
         if(activitiesTemp != null && !activitiesTemp.isEmpty()) {
