@@ -21,21 +21,19 @@ public class CsvStrategy implements DataPersistenceStrategy {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         File finalFile = fileChooser.showSaveDialog(Main.mainStage);
 
-        if(finalFile != null) {
-            if(!finalFile.getName().contains(".")) {
-                finalFile = new File(finalFile.getAbsolutePath() + ".csv");
-            } else if(finalFile.getName().contains(".") && !finalFile.getName().endsWith(".csv")) {
-                finalFile = new File(finalFile.getAbsolutePath().replaceAll("\\..*$", ".csv"));
-            }
+        if (!finalFile.getName().contains(".")) {
+            finalFile = new File(finalFile.getAbsolutePath() + ".csv");
+        } else if (finalFile.getName().contains(".") && !finalFile.getName().endsWith(".csv")) {
+            finalFile = new File(finalFile.getAbsolutePath().replaceAll("\\..*$", ".csv"));
+        }
 
-            try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(finalFile))) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Date;Time;Info\n");
-                for(Activity activity : observableList) {
-                    sb.append(activity.getDate() + ";" + activity.getTime() + ";" + activity.getInfo() + "\n");
-                }
-                bufferedWriter.write(sb.toString());
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(finalFile))) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Date;Time;Info\n");
+            for (Activity activity : observableList) {
+                sb.append(activity.getDate() + ";" + activity.getTime() + ";" + activity.getInfo() + "\n");
             }
+            bufferedWriter.write(sb.toString());
         }
     }
 

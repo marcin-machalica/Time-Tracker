@@ -101,7 +101,7 @@ public class MainController {
         } catch (IOException ex) {
             ex.printStackTrace();
             showNotification(10, "Export error", "Error during exporting data to \n" + csvStrategy.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
-        }
+        } catch (NullPointerException ex) { }
     }
 
     @FXML
