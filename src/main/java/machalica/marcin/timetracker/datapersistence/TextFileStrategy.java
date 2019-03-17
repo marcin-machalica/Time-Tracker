@@ -20,9 +20,12 @@ public class TextFileStrategy implements DataPersistenceStrategy {
     @Override
     public void save(ObservableList<Activity> observableList) throws IOException {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(tempFile))) {
+            StringBuilder sb = new StringBuilder();
             for(Activity activity : observableList) {
-                bufferedWriter.append(activity.getDate() + ";" + activity.getTime() + ";" + activity.getInfo() + "\n");
+                sb.append(activity.getDate() + ";" + activity.getTime() + ";" + activity.getInfo() + "\n");
             }
+            bufferedWriter.write(sb.toString());
+
             if(finalFile.exists() && !finalFile.delete()) {
                 tempFile.delete();
                 throw new FileAlreadyExistsException(FINAL_FILE_NAME);

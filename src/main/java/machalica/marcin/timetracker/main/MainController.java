@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import machalica.marcin.timetracker.datapersistence.CsvStrategy;
 import machalica.marcin.timetracker.datapersistence.DataPersistenceStrategy;
 import machalica.marcin.timetracker.datapersistence.SerializationStrategy;
 import machalica.marcin.timetracker.datapersistence.TextFileStrategy;
@@ -89,6 +90,51 @@ public class MainController {
         dateInput.setPromptText("DD/MM/YYYY");
         timeInput.setPromptText("00:00");
         Platform.runLater(() -> dateInput.requestFocus());
+    }
+
+    @FXML
+    private void exportCsv() {
+        CsvStrategy csvStrategy = new CsvStrategy();
+        try {
+            csvStrategy.save(activities);
+            showNotification(5, "Data exported","Successfully exported data to \n" + csvStrategy.toString() + ".", "/saveicon.png");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            showNotification(10, "Export error", "Error during exporting data to \n" + csvStrategy.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
+        }
+    }
+
+    @FXML
+    private void importCsv() {
+        CsvStrategy csvStrategy = new CsvStrategy();
+
+        ObservableList<Activity> activitiesTemp = null;
+        try {
+            activitiesTemp = csvStrategy.load();
+        } catch (FileNotFoundException ex) {
+            Platform.runLater(() -> {
+                System.out.println(ex.getMessage());
+                showNotification(10, "Import error", ex.getMessage(), "/errornotification.png");
+            });
+        } catch (IllegalArgumentException | IOException ex) {
+            Platform.runLater(() -> {
+                ex.printStackTrace();
+                showNotification(10, "Import error", "Error during importing data from \n" + csvStrategy.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
+            });
+        }
+
+        if(activitiesTemp != null && !activitiesTemp.isEmpty()) {
+            activities.setAll(activitiesTemp);
+            Platform.runLater(() -> {
+                showNotification(5,"Data imported", "Successfully imported data from \n" + csvStrategy.toString() + ".", "/loadicon.png");
+            });
+        } else if(activitiesTemp != null && activitiesTemp.isEmpty()) {
+            Platform.runLater(() -> {
+                String errorMsg = "No data found in \n" + csvStrategy.toString() + ".";
+                System.out.println(errorMsg);
+                showNotification(10, "Import error", errorMsg, "/errornotification.png");
+            });
+        }
     }
 
     private void setDataPersistenceOptionAccordingToSettings() {
