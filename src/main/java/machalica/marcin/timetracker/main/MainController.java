@@ -1,5 +1,6 @@
 package machalica.marcin.timetracker.main;
 
+import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -77,6 +78,15 @@ public class MainController {
         timeColumn.setCellValueFactory(new PropertyValueFactory<Activity, String>("time"));
         infoColumn.setCellValueFactory(new PropertyValueFactory<Activity, String>("info"));
         setupActionButtonsColumnCellFactories();
+        activityTable.skinProperty().addListener((observable, oldSkin, newSkin) -> {
+            final TableHeaderRow header = (TableHeaderRow) activityTable.lookup("TableHeaderRow");
+            header.reorderingProperty().addListener((observable1, oldValue, newValue) -> header.setReordering(false));
+        });
+        addActivityButton.focusedProperty().addListener(((observable, oldValue, newValue) -> {
+            if(!newValue) {
+                Platform.runLater(() -> dateInput.requestFocus());
+            }
+        }));
 
         activityTable.setItems(activities);
 
@@ -98,11 +108,11 @@ public class MainController {
     private void setupShortcuts() {
         KeyCombination saveKeyCombination = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
         Runnable saveRunnable = () -> saveData();
-        Platform.runLater(() -> dateInput.getScene().getAccelerators().put(saveKeyCombination, saveRunnable));
+        Platform.runLater(() -> Main.getScene().getAccelerators().put(saveKeyCombination, saveRunnable));
 
-        KeyCombination addActivityKeyCombination = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.SHIFT_DOWN);
+        KeyCombination addActivityKeyCombination = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
         Runnable addActivityRunnable = () -> addActivity();
-        Platform.runLater(() -> dateInput.getScene().getAccelerators().put(addActivityKeyCombination, addActivityRunnable));
+        Platform.runLater(() -> Main.getScene().getAccelerators().put(addActivityKeyCombination, addActivityRunnable));
     }
 
     private void setupShorthandSyntaxListeners(DatePicker dateInput, TextField timeInput, TextField infoInput) {
@@ -227,8 +237,8 @@ public class MainController {
         SimpleBooleanProperty isDiscarded = new SimpleBooleanProperty(false);
 
         result.ifPresent(clickedButton -> {
+            areSettingsSaved.set(saveSettings());
             if(clickedButton == saveButtonType) {
-                areSettingsSaved.set(saveSettings());
                 isDataSaved.set(saveData());
             } else if(clickedButton == discardButtonType) {
                 isDiscarded.set(true);
@@ -277,6 +287,7 @@ public class MainController {
             activities.setAll(activitiesTemp);
             Platform.runLater(() -> {
                 showNotification(5,"Data imported", "Successfully imported data from \n" + csvStrategy.toString() + ".", "/loadicon.png");
+                activityTable.scrollTo(activities.size());
             });
         } else if(activitiesTemp != null && activitiesTemp.isEmpty()) {
             Platform.runLater(() -> {
@@ -432,6 +443,7 @@ public class MainController {
             activities.setAll(activitiesTemp);
             Platform.runLater(() -> {
                 showNotification(5,"Data loaded", "Successfully loaded data from \n" + dataPersistenceObject.toString() + ".", "/loadicon.png");
+                activityTable.scrollTo(activities.size());
             });
         } else if(activitiesTemp != null && activitiesTemp.isEmpty()) {
             Platform.runLater(() -> {
@@ -476,13 +488,13 @@ public class MainController {
     }
 
     private void setupDateInputListener(DatePicker dateInput) {
-        KeyCombination openCalendarKeyCode = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
+        KeyCombination openCalendarKeyCode = new KeyCodeCombination(KeyCode.SPACE, KeyCombination.CONTROL_DOWN);
         Runnable openCalendarRunnable = () -> {
             if(dateInput.isFocused()) {
                 dateInput.show();
             }
         };
-        Platform.runLater(() -> dateInput.getScene().getAccelerators().put(openCalendarKeyCode, openCalendarRunnable));
+        Platform.runLater(() -> Main.getScene().getAccelerators().put(openCalendarKeyCode, openCalendarRunnable));
     }
 
     private void setupActionButtonsColumnCellFactories() {

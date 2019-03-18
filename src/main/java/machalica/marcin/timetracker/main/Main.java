@@ -33,6 +33,10 @@ public class Main extends Application {
         });
     }
 
+    public static Scene getScene() {
+        return mainStage.getScene();
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
