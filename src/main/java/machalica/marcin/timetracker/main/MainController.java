@@ -89,6 +89,7 @@ public class MainController {
     }
 
     private void addActivity() {
+        ShorthandSyntaxHelper.computeActivityInputs(dateInput, timeInput, infoInput);
         LocalDate localDate = dateInput.getValue();
         String time = timeInput.getText();
         String info = infoInput.getText();
@@ -128,8 +129,11 @@ public class MainController {
     private void setupSettingsAndData() {
         setupShortcuts();
         loadSettings();
-        DataHelper.loadData(activities, dataPersistenceObject);
+
         activityTable.setItems(activities);
+        if(DataHelper.loadData(activities, dataPersistenceObject)) {
+            Platform.runLater(() -> activityTable.scrollTo(activities.size()));
+        }
     }
 
     private void setupAddActivityInputs() {

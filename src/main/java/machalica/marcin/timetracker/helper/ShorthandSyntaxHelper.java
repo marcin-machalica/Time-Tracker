@@ -28,6 +28,12 @@ public class ShorthandSyntaxHelper {
         }));
     }
 
+    public static void computeActivityInputs(DatePicker dateInput, TextField timeInput, TextField infoInput) {
+        computeDatePicker(dateInput);
+        computeTimeInput(timeInput);
+        computeInfoInput(infoInput);
+    }
+
     public static void computeDatePicker(DatePicker dateInput) {
         Matcher matcher = Pattern.compile("^[yY]+$").matcher(dateInput.getEditor().getText());
         boolean wasFound = matcher.find();
