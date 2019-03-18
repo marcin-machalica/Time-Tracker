@@ -2,7 +2,6 @@ package machalica.marcin.timetracker.datapersistence;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.stage.FileChooser;
 import machalica.marcin.timetracker.main.Main;
 import machalica.marcin.timetracker.model.Activity;
 
@@ -15,11 +14,7 @@ import java.util.regex.Pattern;
 public class CsvStrategy implements DataPersistenceStrategy {
     @Override
     public void save(ObservableList<Activity> observableList) throws IOException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export CSV");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        File finalFile = fileChooser.showSaveDialog(Main.mainStage);
+        File finalFile = Main.getCsvFromFileChooser(true);
 
         if (!finalFile.getName().contains(".")) {
             finalFile = new File(finalFile.getAbsolutePath() + ".csv");
@@ -39,11 +34,7 @@ public class CsvStrategy implements DataPersistenceStrategy {
 
     @Override
     public ObservableList<Activity> load() throws IOException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Import CSV");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        File finalFile = fileChooser.showOpenDialog(Main.mainStage);
+        File finalFile = Main.getCsvFromFileChooser(false);
 
         ObservableList<Activity> observableList = FXCollections.observableArrayList();
         if(finalFile == null || !finalFile.getName().endsWith(".csv")) { return null; }

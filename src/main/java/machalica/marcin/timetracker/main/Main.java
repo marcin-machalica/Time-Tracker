@@ -5,12 +5,14 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.function.BooleanSupplier;
 
 public class Main extends Application {
-    public static Stage mainStage;
+    private static Stage mainStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -35,6 +37,20 @@ public class Main extends Application {
 
     public static Scene getScene() {
         return mainStage.getScene();
+    }
+
+    public static File getCsvFromFileChooser(boolean isSaveDialog) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+
+        if(isSaveDialog) {
+            fileChooser.setTitle("Export CSV");
+            return fileChooser.showSaveDialog(Main.mainStage);
+        } else {
+            fileChooser.setTitle("Import CSV");
+            return fileChooser.showOpenDialog(Main.mainStage);
+        }
     }
 
     public static void main(String[] args) {
