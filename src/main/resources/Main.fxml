@@ -22,10 +22,10 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" onAction="#saveData" text="Save" />
-                  <MenuItem mnemonicParsing="false" onAction="#loadData" text="Load" />
-                  <MenuItem mnemonicParsing="false" onAction="#exportCsv" text="Export CSV" />
-                  <MenuItem mnemonicParsing="false" onAction="#importCsv" text="Import CSV" />
+              <MenuItem fx:id="saveDataMenuItem" mnemonicParsing="false" text="Save" />
+                  <MenuItem fx:id="loadDataMenuItem" mnemonicParsing="false" text="Load" />
+                  <MenuItem fx:id="exportCsvMenuItem" mnemonicParsing="false" text="Export CSV" />
+                  <MenuItem fx:id="importCsvMenuItem" mnemonicParsing="false" text="Import CSV" />
                   <Menu mnemonicParsing="false" text="Save/Load method">
                      <items>
                         <RadioMenuItem fx:id="dataPersistenceOptionTextFile" mnemonicParsing="false" text="Text File">
@@ -41,7 +41,7 @@
           </Menu>
             <Menu mnemonicParsing="false" text="Help">
                <items>
-                  <MenuItem mnemonicParsing="false" onAction="#showAbout" text="About" />
+                  <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" text="About" />
                </items>
             </Menu>
         </menus>
