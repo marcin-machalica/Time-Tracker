@@ -1,0 +1,87 @@
+.root {
+    -fx-font-family: "Verdana";
+    -fx-background-color: #303030;
+}
+
+.menu, .menu-item {
+    -fx-cursor: hand;
+}
+
+.menu-bar, .menu-item {
+    -fx-background-color: #303030;
+}
+
+.menu-bar .label {
+    -fx-text-fill: #ffffff;
+    -fx-opacity: 0.7;
+}
+
+.menu:hover > .label, .menu:focused > .label, .menu:showing > .label,
+.menu-item:hover > .label, .menu-item:focused > .label {
+    -fx-opacity: 0.9;
+}
+
+.menu:hover, .menu:focused, .menu:showing,
+.menu-item:hover, .menu-item:focused {
+    -fx-background-color: #b91d47;
+}
+
+.context-menu {
+    -fx-skin: "com.sun.javafx.scene.control.skin.ContextMenuSkin";
+    -fx-background-color: #303030;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0 6 6 6, 0 5 5 5, 0 4 4 4;
+    -fx-padding: 4 4 4 4;
+}
+
+.button {
+    -fx-cursor: hand;
+}
+
+#addActivityButton {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-opacity: 0.7;
+    -fx-padding: 5 20 5 20;
+    -fx-border-insets: 5;
+    -fx-background-insets: 5;
+    -fx-border-style: solid;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-border-color: #b91d47;
+}
+
+#addActivityButton:focused, #addActivityButton:hover {
+    -fx-opacity: 0.8;
+    -fx-padding: 5 20 5 20;
+    -fx-border-insets: 5;
+    -fx-background-insets: 5;
+    -fx-background-color: #b91d47;
+    -fx-border-color: #ee1111;
+}
+
+.date-picker {
+    -fx-background-color: transparent;
+}
+
+.text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-opacity: 0.7;
+    -fx-padding: 10 5 5 5;
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #b91d47;
+}
+
+.text-field:focused {
+    -fx-opacity: 0.8;
+    -fx-padding: 5 5 5 5;
+    -fx-border-color: #ee1111;
+}
+
+.date-picker > .arrow-button,
+.date-picker > .arrow-button > .arrow {
+    -fx-padding: 0;
+    -fx-border-width: 0 0 0 0;
+}
