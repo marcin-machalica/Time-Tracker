@@ -13,6 +13,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -86,10 +88,21 @@ public class MainController {
         setupDateInputListener(dateInput);
         setupAddActivityButtonListeners();
         setupShorthandSyntaxListeners(dateInput, timeInput, infoInput);
+        setupShortcuts();
 
         dateInput.setPromptText("DD/MM/YYYY");
         timeInput.setPromptText("0:00");
         Platform.runLater(() -> dateInput.requestFocus());
+    }
+
+    private void setupShortcuts() {
+        KeyCombination saveKeyCombination = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+        Runnable saveRunnable = () -> saveData();
+        Platform.runLater(() -> dateInput.getScene().getAccelerators().put(saveKeyCombination, saveRunnable));
+
+        KeyCombination addActivityKeyCombination = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.SHIFT_DOWN);
+        Runnable addActivityRunnable = () -> addActivity();
+        Platform.runLater(() -> dateInput.getScene().getAccelerators().put(addActivityKeyCombination, addActivityRunnable));
     }
 
     private void setupShorthandSyntaxListeners(DatePicker dateInput, TextField timeInput, TextField infoInput) {
@@ -181,7 +194,7 @@ public class MainController {
         infoInput.focusedProperty().addListener(((observable, oldValue, newValue) -> {
             if(!newValue) {
                 infoInput.setText(infoInput.getText().trim());
-                
+
                 if(infoInput.getText().length() > 0) {
                     char firstChar = infoInput.getText().charAt(0);
                     if(Character.isLetter(firstChar)) {
@@ -463,11 +476,13 @@ public class MainController {
     }
 
     private void setupDateInputListener(DatePicker dateInput) {
-        dateInput.setOnKeyReleased(k -> {
-            if(k.getCode() == KeyCode.ENTER) {
+        KeyCombination openCalendarKeyCode = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
+        Runnable openCalendarRunnable = () -> {
+            if(dateInput.isFocused()) {
                 dateInput.show();
             }
-        });
+        };
+        Platform.runLater(() -> dateInput.getScene().getAccelerators().put(openCalendarKeyCode, openCalendarRunnable));
     }
 
     private void setupActionButtonsColumnCellFactories() {
