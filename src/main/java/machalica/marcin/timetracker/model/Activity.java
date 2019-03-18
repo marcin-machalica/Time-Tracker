@@ -11,7 +11,7 @@ public class Activity {
     private final SimpleStringProperty time;
     private final SimpleStringProperty info;
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    public static final String TIME_PATTERN = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
+    public static final String TIME_PATTERN = "^(1?[0-9]|2[0-3]):[0-5][0-9]$";
 
     public Activity(LocalDate localDate, String time, String info) throws DateTimeException, IllegalArgumentException {
         if(localDate == null) { throw new IllegalArgumentException("LocalDate object cannot be null"); }
