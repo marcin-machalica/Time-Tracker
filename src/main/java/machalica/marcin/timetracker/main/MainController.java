@@ -232,17 +232,15 @@ public class MainController {
     private void setupAddActivityButtonListeners() {
         addActivityButton.setOnAction(e -> addActivity());
 
-        addActivityButton.setOnKeyReleased(k -> {
+        addActivityButton.setOnKeyPressed(k -> {
+            System.out.println(k);
             if(k.getCode() == KeyCode.ENTER) {
                 addActivity();
-            }
-        });
-
-        addActivityButton.focusedProperty().addListener(((observable, oldValue, newValue) -> {
-            if(!newValue) {
+            } else if(k.getCode() == KeyCode.TAB) {
+                System.out.println(k.getEventType());
                 Platform.runLater(() -> dateInput.requestFocus());
             }
-        }));
+        });
     }
 
     private void setupActionButtonsColumnCellFactory() {
