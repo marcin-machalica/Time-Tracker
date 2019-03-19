@@ -89,35 +89,16 @@
     -fx-padding: 0;
 }
 
-.table-view .table-cell {
+.cell {
     -fx-text-fill: #ffffff;
-    -fx-opacity: 0.7;
+    -fx-opacity: 0.9;
 }
 
+.indexed-cell:selected {
+    -fx-background-color: #404040;
+}
 
 /* inputs */
-#addActivityButton {
-    -fx-background-color: transparent;
-    -fx-text-fill: #ffffff;
-    -fx-opacity: 0.7;
-    -fx-padding: 5 20 5 20;
-    -fx-border-insets: 5;
-    -fx-background-insets: 5;
-    -fx-border-style: solid;
-    -fx-border-width: 1;
-    -fx-border-radius: 5;
-    -fx-border-color: #b91d47;
-}
-
-#addActivityButton:focused, #addActivityButton:hover {
-    -fx-opacity: 0.8;
-    -fx-padding: 5 20 5 20;
-    -fx-border-insets: 5;
-    -fx-background-insets: 5;
-    -fx-background-color: #b91d47;
-    -fx-border-color: #ee1111;
-}
-
 .date-picker {
     -fx-background-color: transparent;
 }
@@ -142,4 +123,71 @@
 .date-picker > .arrow-button > .arrow {
     -fx-padding: 0;
     -fx-border-width: 0 0 0 0;
+}
+
+#addActivityButton, .save-button,
+.cancel-button, .discard-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-opacity: 0.7;
+    -fx-padding: 5 20 5 20;
+    -fx-border-insets: 5;
+    -fx-background-insets: 5;
+    -fx-border-style: solid;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-border-color: #b91d47;
+}
+
+#addActivityButton:focused, #addActivityButton:hover,
+.save-button:focused, .save-button:hover,
+.cancel-button:focused, .cancel-button:hover,
+.discard-button:focused, .discard-button:hover {
+    -fx-opacity: 0.8;
+    -fx-padding: 5 20 5 20;
+    -fx-border-insets: 5;
+    -fx-background-insets: 5;
+    -fx-background-color: #b91d47;
+    -fx-border-color: #ee1111;
+}
+
+.cancel-button {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: transparent;
+    -fx-border-color: #606060;
+}
+
+.cancel-button:focused, .cancel-button:hover {
+    -fx-background-color: #606060;
+    -fx-border-color: #707070;
+}
+
+.discard-button {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: transparent;
+    -fx-border-color: #9acd32;
+}
+
+.discard-button:focused, .discard-button:hover {
+    -fx-background-color: #9acd32;
+    -fx-border-color: #adff2f;
+}
+
+.edit-button {
+    -fx-background-image: url('/editicon.png');
+    -fx-pref-width: 32px;
+    -fx-pref-height: 32px;
+    -fx-background-size: 32 32;
+}
+
+.delete-button {
+    -fx-background-image: url('/deleteicon.png');
+    -fx-pref-width: 32px;
+    -fx-pref-height: 32px;
+    -fx-background-size: 32 32;
+}
+
+#aboutLabel {
+    -fx-text-fill: #ffffff;
+    -fx-opacity: 0.7;
 }

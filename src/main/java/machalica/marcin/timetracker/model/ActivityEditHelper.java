@@ -10,6 +10,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import machalica.marcin.timetracker.helper.DialogHelper;
 import machalica.marcin.timetracker.helper.ShorthandSyntaxHelper;
 
 import java.time.DateTimeException;
@@ -20,6 +21,9 @@ public class ActivityEditHelper {
     public static boolean editActivity(Activity activity) {
         final Dialog<Activity> dialog = new Dialog<>();
         dialog.setTitle("Edit");
+        dialog.getDialogPane().getStylesheets().add("dark-theme.css");
+
+        DialogHelper.centerDialog(dialog, 537.0, 170.0);
 
         final DatePicker editDateInput = new DatePicker();
         editDateInput.setPromptText("DD/MM/YYYY");
@@ -50,6 +54,9 @@ public class ActivityEditHelper {
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
         final Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
         final Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+
+        saveButton.getStyleClass().add("save-button");
+        cancelButton.getStyleClass().add("cancel-button");
 
         saveButton.addEventFilter(ActionEvent.ACTION, e -> {
             if (editDateInput.getValue() == null) {

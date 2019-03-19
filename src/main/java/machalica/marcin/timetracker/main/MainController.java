@@ -12,6 +12,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
 import machalica.marcin.timetracker.datapersistence.*;
 import machalica.marcin.timetracker.helper.AboutHelper;
 import machalica.marcin.timetracker.helper.ExitHelper;
@@ -74,14 +76,11 @@ public class MainController {
     }
 
     private void initialSetup() {
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-        timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
-        infoColumn.setCellValueFactory(new PropertyValueFactory<>("info"));
-        setColumnReorderingFalse();
-        setupActionButtonsColumnCellFactories();
+        setupTable();
 
         setupMenuItemsActions();
         setupDataPersistenceOptionMenuItemsOnAction();
+
         setupAddActivityButtonListeners();
         setupAddActivityInputs();
 
@@ -134,6 +133,16 @@ public class MainController {
         if(DataHelper.loadData(activities, dataPersistenceObject)) {
             Platform.runLater(() -> activityTable.scrollTo(activities.size()));
         }
+    }
+
+    private void setupTable() {
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
+        infoColumn.setCellValueFactory(new PropertyValueFactory<>("info"));
+        setupInfoColumnCellFactory();
+        setupActionButtonsColumnCellFactory();
+        setColumnReorderingFalse();
+        Main.setOnResize(() -> activityTable.refresh());
     }
 
     private void setupAddActivityInputs() {
@@ -236,12 +245,12 @@ public class MainController {
         }));
     }
 
-    private void setupActionButtonsColumnCellFactories() {
+    private void setupActionButtonsColumnCellFactory() {
         actionButtonsColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 
         actionButtonsColumn.setCellFactory(param -> new TableCell<Activity, Activity>() {
-            private final Button editButton = new Button("Edit");
-            private final Button deleteButton = new Button("Delete");
+            private final Button editButton = new Button("");
+            private final Button deleteButton = new Button("");
             private final HBox actionButtonsHBox = new HBox(10, editButton, deleteButton);
 
             @Override
@@ -255,9 +264,31 @@ public class MainController {
 
                 setGraphic(actionButtonsHBox);
 
+                deleteButton.getStyleClass().add("delete-button");
+                editButton.getStyleClass().add("edit-button");
+
                 deleteButton.setOnAction(e -> getTableView().getItems().remove(activity));
                 editButton.setOnAction(e -> editActivity(activity));
             }
+        });
+    }
+
+    private void setupInfoColumnCellFactory() {
+        infoColumn.setCellFactory (col -> {
+            TableCell<Activity, String> cell = new TableCell<Activity, String>() {
+                @Override
+                public void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (item != null) {
+                        Text text = new Text(item);
+                        text.setWrappingWidth(col.getWidth() - 10);
+                        text.setFill(Paint.valueOf("#ffffff"));
+                        this.setPrefHeight(text.getLayoutBounds().getHeight()+10);
+                        this.setGraphic(text);
+                    }
+                }
+            };
+            return cell;
         });
     }
 }
