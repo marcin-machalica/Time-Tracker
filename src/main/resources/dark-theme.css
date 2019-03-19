@@ -1,14 +1,20 @@
+/* general */
 .root {
     -fx-font-family: "Verdana";
     -fx-background-color: #303030;
 }
 
+.button {
+    -fx-cursor: hand;
+}
+
+/* menu */
 .menu, .menu-item {
     -fx-cursor: hand;
 }
 
 .menu-bar, .menu-item {
-    -fx-background-color: #303030;
+    -fx-background-color: #404040;
 }
 
 .menu-bar .label {
@@ -34,10 +40,62 @@
     -fx-padding: 4 4 4 4;
 }
 
-.button {
+/* table */
+.table-view {
+    -fx-padding: 20 10;
+}
+
+.table-view, .table-view:focused {
+    -fx-background-color: transparent;
+}
+
+.table-view .filler {
+   -fx-background-color: transparent;
+}
+
+.table-view .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.table-view .scroll-bar .decrement-arrow, .table-view .scroll-bar .decrement-button,
+.table-view .scroll-bar .increment-arrow, .table-view .scroll-bar .increment-button {
+    -fx-shape: " ";
+}
+
+.table-view .scroll-bar .thumb {
+    -fx-background-color: #b91d47;
+    -fx-opacity: 0.7;
     -fx-cursor: hand;
 }
 
+.table-view .column-header-background {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-opacity: 0.7;
+}
+
+.table-row-cell{
+    -fx-background-color: #202020, #303030;
+    -fx-table-cell-border-color: #202020;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #ffffff;
+    -fx-opacity: 0.7;
+}
+
+
+/* inputs */
 #addActivityButton {
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
