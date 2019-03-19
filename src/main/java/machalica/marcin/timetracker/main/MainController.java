@@ -131,7 +131,10 @@ public class MainController {
 
         activityTable.setItems(activities);
         if(DataHelper.loadData(activities, dataPersistenceObject)) {
-            Platform.runLater(() -> activityTable.scrollTo(activities.size()));
+            Platform.runLater(() -> {
+                activityTable.refresh();
+                activityTable.scrollTo(activities.size());
+            });
         }
     }
 
@@ -215,14 +218,20 @@ public class MainController {
         saveDataMenuItem.setOnAction(e -> DataHelper.saveData(activities, dataPersistenceObject));
         loadDataMenuItem.setOnAction(e -> {
             if(DataHelper.loadData(activities, dataPersistenceObject)) {
-                Platform.runLater(() -> activityTable.scrollTo(activities.size()));
+                Platform.runLater(() -> {
+                    activityTable.refresh();
+                    activityTable.scrollTo(activities.size());
+                });
             }
         });
 
         exportCsvMenuItem.setOnAction(e -> DataHelper.exportCsv(activities));
         importCsvMenuItem.setOnAction(e -> {
             if(DataHelper.importCsv(activities)) {
-                Platform.runLater(() -> activityTable.scrollTo(activities.size()));
+                Platform.runLater(() -> {
+                    activityTable.refresh();
+                    activityTable.scrollTo(activities.size());
+                });
             }
         });
 
