@@ -272,7 +272,10 @@ public class MainController {
                 deleteButton.getStyleClass().add("delete-button");
                 editButton.getStyleClass().add("edit-button");
 
-                deleteButton.setOnAction(e -> getTableView().getItems().remove(activity));
+                deleteButton.setOnAction(e -> {
+                    getTableView().getItems().remove(activity);
+                    Platform.runLater(() -> activityTable.refresh());
+                });
                 editButton.setOnAction(e -> editActivity(activity));
             }
         });
