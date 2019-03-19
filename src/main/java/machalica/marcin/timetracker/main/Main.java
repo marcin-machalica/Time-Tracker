@@ -2,6 +2,7 @@ package machalica.marcin.timetracker.main;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -19,7 +20,15 @@ public class Main extends Application {
         mainStage = primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("/Main.fxml"));
         primaryStage.setTitle("Time Tracker");
-        primaryStage.setScene(new Scene(root, 600, 400));
+
+        Scene scene = new Scene(root, 610, 500);
+        scene.getStylesheets().add("dark-theme.css");
+
+        primaryStage.setMinWidth(610);
+        primaryStage.setMinHeight(500);
+        primaryStage.setMaxWidth(800);
+
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 
@@ -33,6 +42,31 @@ public class Main extends Application {
                 e.consume();
             }
         });
+    }
+
+    public static void setOnResize(Runnable runnable) {
+        ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) -> {
+            runnable.run();
+        };
+
+        mainStage.widthProperty().addListener(stageSizeListener);
+        mainStage.heightProperty().addListener(stageSizeListener);
+    }
+
+    public static double getPosX() {
+        return mainStage.getX();
+    }
+
+    public static double getPosY() {
+        return mainStage.getY();
+    }
+
+    public static double getWidth() {
+        return mainStage.getWidth();
+    }
+
+    public static double getHeight() {
+        return mainStage.getHeight();
     }
 
     public static Scene getScene() {
