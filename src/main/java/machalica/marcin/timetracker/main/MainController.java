@@ -28,6 +28,9 @@ import java.sql.Date;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 
+import static machalica.marcin.timetracker.datapersistence.DataHelper.getDataPersistenceObject;
+import static machalica.marcin.timetracker.datapersistence.DataHelper.getDataPersistenceObjectAccordingToSettings;
+
 public class MainController {
     @FXML
     private TableView activityTable;
@@ -129,7 +132,9 @@ public class MainController {
     private void setupSettingsAndData() {
         setupShortcuts();
         Settings.loadSettings();
-        setDataPersistenceOptionAccordingToSettings();
+
+        dataPersistenceObject = getDataPersistenceObjectAccordingToSettings();
+        setDataPersistenceMenuOptionAccordingToSettings();
 
         activityTable.setItems(activities);
         System.out.println(dataPersistenceObject);
@@ -183,19 +188,16 @@ public class MainController {
         });
     }
 
-    private void setDataPersistenceOptionAccordingToSettings() {
-        switch (Settings.getDataPersistenceDefaultOption()) {
+    private void setDataPersistenceMenuOptionAccordingToSettings() {
+        switch (Settings.getDataPersistenceOption()) {
             case SERIALIZATION:
-                dataPersistenceObject = new SerializationStrategy();
                 Platform.runLater(() -> dataPersistenceOptionSerialization.setSelected(true));
                 break;
             case DATABASE:
-                dataPersistenceObject = new DatabaseStrategy();
                 Platform.runLater(() -> dataPersistenceOptionDatabase.setSelected(true));
                 break;
             case TEXT_FILE:
             default:
-                dataPersistenceObject = new TextFileStrategy();
                 Platform.runLater(() -> dataPersistenceOptionTextFile.setSelected(true));
                 break;
         }
@@ -213,18 +215,18 @@ public class MainController {
 
     private void setupDataPersistenceOptionMenuItemsOnAction() {
         dataPersistenceOptionTextFile.setOnAction(e -> Platform.runLater(() -> {
-            dataPersistenceObject = new TextFileStrategy();
-            Settings.setDataPersistenceDefaultOption(DataPersistenceOption.TEXT_FILE);
+            dataPersistenceObject = getDataPersistenceObject(DataPersistenceOption.TEXT_FILE);
+            Settings.setDataPersistenceOption(DataPersistenceOption.TEXT_FILE);
             Settings.saveSettings();
         }));
         dataPersistenceOptionSerialization.setOnAction(e -> Platform.runLater(() -> {
-            dataPersistenceObject = new SerializationStrategy();
-            Settings.setDataPersistenceDefaultOption(DataPersistenceOption.SERIALIZATION);
+            dataPersistenceObject = getDataPersistenceObject(DataPersistenceOption.SERIALIZATION);
+            Settings.setDataPersistenceOption(DataPersistenceOption.SERIALIZATION);
             Settings.saveSettings();
         }));
         dataPersistenceOptionDatabase.setOnAction(e -> Platform.runLater(() -> {
-            dataPersistenceObject = new DatabaseStrategy();
-            Settings.setDataPersistenceDefaultOption(DataPersistenceOption.DATABASE);
+            dataPersistenceObject = getDataPersistenceObject(DataPersistenceOption.DATABASE);
+            Settings.setDataPersistenceOption(DataPersistenceOption.DATABASE);
             Settings.saveSettings();
         }));
     }

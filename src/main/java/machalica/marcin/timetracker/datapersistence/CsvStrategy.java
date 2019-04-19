@@ -12,6 +12,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CsvStrategy implements DataPersistenceStrategy {
+    private static final CsvStrategy csvStrategy = new CsvStrategy();
+
+    private CsvStrategy() { }
+
     @Override
     public void save(ObservableList<Activity> observableList) throws IOException {
         File finalFile = Main.getCsvFromFileChooser(true);
@@ -66,6 +70,10 @@ public class CsvStrategy implements DataPersistenceStrategy {
             }
             return observableList;
         }
+    }
+
+    public static CsvStrategy getInstance() {
+        return csvStrategy;
     }
 
     @Override

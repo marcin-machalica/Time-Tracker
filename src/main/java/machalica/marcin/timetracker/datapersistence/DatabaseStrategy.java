@@ -14,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DatabaseStrategy implements DataPersistenceStrategy {
+    private static final DatabaseStrategy databaseStrategy = new DatabaseStrategy();
+
     private static final String USERNAME_PATTERN = "(?<=^USERNAME=)[a-zA-Z0-9]{1,15}$";
     private static final String PASSWORD_PATTERN = "(?<=^PASSWORD=).{0,15}";
 
@@ -24,6 +26,8 @@ public class DatabaseStrategy implements DataPersistenceStrategy {
     private String USERNAME;
     private String PASSWORD;
     Connection connection;
+
+    private DatabaseStrategy() { }
 
     private void loadCredentials() throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(FINAL_FILE_NAME))) {
@@ -138,6 +142,10 @@ public class DatabaseStrategy implements DataPersistenceStrategy {
             }
             return observableList;
         }
+    }
+
+    public static DatabaseStrategy getInstance() {
+        return databaseStrategy;
     }
 
     @Override

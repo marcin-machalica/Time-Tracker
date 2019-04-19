@@ -5,6 +5,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import machalica.marcin.timetracker.helper.NotificationHelper;
 import machalica.marcin.timetracker.model.Activity;
+import machalica.marcin.timetracker.settings.DataPersistenceOption;
+import machalica.marcin.timetracker.settings.Settings;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -80,7 +82,7 @@ public class DataHelper {
     }
 
     public static boolean exportCsv(ObservableList<Activity> activities) {
-        CsvStrategy csvStrategy = new CsvStrategy();
+        DataPersistenceStrategy csvStrategy = getDataPersistenceObject(DataPersistenceOption.CSV);
         boolean isSaved = false;
 
         try {
@@ -97,7 +99,7 @@ public class DataHelper {
     }
 
     public static boolean importCsv(ObservableList<Activity> activities) {
-        CsvStrategy csvStrategy = new CsvStrategy();
+        CsvStrategy csvStrategy = CsvStrategy.getInstance();
         ObservableList<Activity> activitiesTemp = null;
         SimpleBooleanProperty isLoaded = new SimpleBooleanProperty(false);
 
@@ -129,5 +131,46 @@ public class DataHelper {
             });
         }
         return isLoaded.get();
+    }
+
+    public static DataPersistenceStrategy getDataPersistenceObjectAccordingToSettings() {
+        DataPersistenceStrategy dataPersistenceObject;
+
+        switch (Settings.getDataPersistenceOption()) {
+            case SERIALIZATION:
+                dataPersistenceObject = SerializationStrategy.getInstance();
+                break;
+            case DATABASE:
+                dataPersistenceObject = DatabaseStrategy.getInstance();
+                break;
+            case TEXT_FILE:
+            default:
+                dataPersistenceObject = TextFileStrategy.getInstance();
+                break;
+        }
+
+        return dataPersistenceObject;
+    }
+
+    public static DataPersistenceStrategy getDataPersistenceObject(DataPersistenceOption dataPersistenceOption) {
+        DataPersistenceStrategy dataPersistenceObject;
+
+        switch (dataPersistenceOption) {
+            case SERIALIZATION:
+                dataPersistenceObject = SerializationStrategy.getInstance();
+                break;
+            case DATABASE:
+                dataPersistenceObject = DatabaseStrategy.getInstance();
+                break;
+            case CSV:
+                dataPersistenceObject = CsvStrategy.getInstance();
+                break;
+            case TEXT_FILE:
+            default:
+                dataPersistenceObject = TextFileStrategy.getInstance();
+                break;
+        }
+
+        return dataPersistenceObject;
     }
 }
