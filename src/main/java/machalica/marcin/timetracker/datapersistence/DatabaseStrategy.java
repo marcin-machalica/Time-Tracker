@@ -14,98 +14,120 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DatabaseStrategy implements DataPersistenceStrategy {
-    private static final String DATABASE_NAME_PATTERN = "(?<=^DATABASE_NAME=)[a-zA-Z0-9]{1,15}$";
-    private static final String TABLE_NAME_PATTERN = "(?<=^TABLE_NAME=)[a-zA-Z0-9]{1,15}$";
     private static final String USERNAME_PATTERN = "(?<=^USERNAME=)[a-zA-Z0-9]{1,15}$";
     private static final String PASSWORD_PATTERN = "(?<=^PASSWORD=).{0,15}";
 
     private static final String FINAL_FILE_NAME = "database_credentials.txt";
 
-    private static String DB_URL;
-    private static String TABLE_NAME;
-    private static String USERNAME;
-    private static String PASSWORD;
+    private final String DB_URL = "jdbc:postgresql://localhost/timetracker";
+    private final String TABLE_NAME = "Activity";
+    private String USERNAME;
+    private String PASSWORD;
+    Connection connection;
 
-    private static void loadCredentials() throws IOException {
-        try(BufferedReader bufferedReader = new BufferedReader(new FileReader(FINAL_FILE_NAME))) {
+    private void loadCredentials() throws IOException {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(FINAL_FILE_NAME))) {
             String line;
             int count = 0;
             Matcher matcher;
             boolean wasFound;
 
-            while(((line = bufferedReader.readLine()) != null) && count <= 4) {
+            while (((line = bufferedReader.readLine()) != null) && count <= 2) {
                 count++;
-                String[] patterns = {DATABASE_NAME_PATTERN, TABLE_NAME_PATTERN, USERNAME_PATTERN, PASSWORD_PATTERN};
+                String[] patterns = {USERNAME_PATTERN, PASSWORD_PATTERN};
 
-                matcher = Pattern.compile(patterns[count-1]).matcher(line);
-                if (matcher != null) {
-                    wasFound = matcher.find();
-                    if (wasFound) {
-                        switch (count) {
-                            case 1:
-                                DB_URL = "jdbc:postgresql://localhost/" + matcher.group(0);
-                                break;
-                            case 2:
-                                TABLE_NAME = matcher.group(0);
-                                break;
-                            case 3:
-                                USERNAME = matcher.group(0);
-                                break;
-                            case 4:
-                                PASSWORD = matcher.group(0);
-                                break;
-                        }
-                    } else {
-                        throw new IllegalArgumentException("Cannot load database credentials.\nWrong format in line: " + count);
+                matcher = Pattern.compile(patterns[count - 1]).matcher(line);
+                wasFound = matcher.find();
+
+                if (wasFound) {
+                    switch (count) {
+                        case 1:
+                            USERNAME = matcher.group(0);
+                            break;
+                        case 2:
+                            PASSWORD = matcher.group(0);
+                            break;
                     }
+                } else {
+                    throw new IllegalArgumentException("Cannot load database credentials.\nWrong format in line: " + count);
                 }
             }
-        } catch (FileNotFoundException ex) { throw new FileNotFoundException("Credentials Text File (" + FINAL_FILE_NAME + ") doesn't exist."); }
+        } catch (FileNotFoundException ex) {
+            throw new FileNotFoundException("Credentials Text File (" + FINAL_FILE_NAME + ") doesn't exist.");
+        }
+    }
+
+    public boolean areCredentialsLoaded() {
+        if (USERNAME == null || USERNAME.isEmpty() || PASSWORD == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
     public void save(ObservableList<Activity> observableList) throws ClassNotFoundException, SQLException, IOException {
         Class.forName("org.postgresql.Driver");
-        loadCredentials();
 
+        if (!areCredentialsLoaded()) {
+            loadCredentials();
+        }
+
+        String createSQL = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME +
+                " (date   DATE," +
+                "  time   VARCHAR(5)," +
+                "  info   VARCHAR(200))";
+        String truncateSQL = "TRUNCATE TABLE " + TABLE_NAME;
+        String insertSQL = "INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?)";
         try (
                 Connection connection = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-                Statement statement = connection.createStatement()
+                PreparedStatement createTableStatement = connection.prepareStatement(createSQL);
+                PreparedStatement truncateTableStatement = connection.prepareStatement(truncateSQL);
+                PreparedStatement insertStatement = connection.prepareStatement(insertSQL)
+
         ) {
+            connection.setAutoCommit(false);
 
-            String createTableQuery = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME +
-                    " (date   DATE," +
-                    "  time   VARCHAR(5)," +
-                    "  info   VARCHAR(200))";
-            String truncateTableQuery = "TRUNCATE TABLE " + TABLE_NAME;
+            createTableStatement.execute();
+            truncateTableStatement.execute();
 
-            statement.addBatch(createTableQuery);
-            statement.addBatch(truncateTableQuery);
+            for (Activity activity : observableList) {
+                insertStatement.setDate(1, activity.getDate());
+                insertStatement.setString(2, activity.getTime());
+                insertStatement.setString(3, activity.getInfo());
 
-            for(Activity activity : observableList) {
-                statement.addBatch("INSERT INTO " + TABLE_NAME + " VALUES(" +
-                        "'" + activity.getDate() + "'," +
-                        "'" + activity.getTime() + "'," +
-                        "'" + activity.getInfo() + "')"
-                );
+                insertStatement.addBatch();
             }
-            statement.executeBatch();
+
+            insertStatement.executeBatch();
+
+            connection.commit();
+        } catch (SQLException ex) {
+            if (connection != null) {
+                ex.printStackTrace();
+                connection.rollback();
+                throw ex;
+            }
         }
     }
 
     @Override
     public ObservableList<Activity> load() throws ClassNotFoundException, SQLException, IOException {
         Class.forName("org.postgresql.Driver");
-        loadCredentials();
 
+        if (!areCredentialsLoaded()) {
+            loadCredentials();
+        }
+
+        String selectSQL = "SELECT date, time, info FROM " + TABLE_NAME;
         try (
                 Connection connection = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-                Statement statement = connection.createStatement()
+                PreparedStatement selectStatement = connection.prepareStatement(selectSQL)
         ) {
-            String query = "SELECT date, time, info FROM " + TABLE_NAME;
+            System.out.println(selectStatement); // DEBUG
             ObservableList<Activity> observableList = FXCollections.observableArrayList();
 
-            try(ResultSet resultSet = statement.executeQuery(query)) {
+            try (ResultSet resultSet = selectStatement.executeQuery()) {
                 while (resultSet.next()) {
                     observableList.add(new Activity(
                             LocalDate.parse(resultSet.getString("date")),
