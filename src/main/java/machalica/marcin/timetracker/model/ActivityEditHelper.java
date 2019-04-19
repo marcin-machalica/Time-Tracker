@@ -27,7 +27,7 @@ public class ActivityEditHelper {
 
         final DatePicker editDateInput = new DatePicker();
         editDateInput.setPromptText("DD/MM/YYYY");
-        editDateInput.getEditor().setText(activity.getDate());
+        editDateInput.getEditor().setText(activity.getFormattedDateString());
         DatePickerHelper.setupDatePickerConverter(editDateInput);
         DatePickerHelper.setupShowCalendarListener(editDateInput);
 
@@ -103,7 +103,7 @@ public class ActivityEditHelper {
 
         result.ifPresent(editedActivity -> {
             editWarningLabel.setText("");
-            activity.setDate(editedActivity.getLocalDate());
+            activity.setDate(editedActivity.getDate().toLocalDate());
             activity.setTime(editedActivity.getTime());
             activity.setInfo(editedActivity.getInfo());
             wasEdited.set(true);

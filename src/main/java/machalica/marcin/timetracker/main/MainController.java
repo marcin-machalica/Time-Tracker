@@ -24,6 +24,7 @@ import machalica.marcin.timetracker.model.DatePickerHelper;
 import machalica.marcin.timetracker.settings.DataPersistenceOption;
 import machalica.marcin.timetracker.settings.Settings;
 
+import java.sql.Date;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 
@@ -31,7 +32,7 @@ public class MainController {
     @FXML
     private TableView activityTable;
     @FXML
-    private TableColumn<Activity, String> dateColumn;
+    private TableColumn<Activity, Date> dateColumn;
     @FXML
     private TableColumn<Activity, String> timeColumn;
     @FXML
@@ -127,9 +128,11 @@ public class MainController {
 
     private void setupSettingsAndData() {
         setupShortcuts();
-        loadSettings();
+        Settings.loadSettings();
+        setDataPersistenceOptionAccordingToSettings();
 
         activityTable.setItems(activities);
+        System.out.println(dataPersistenceObject);
         if(DataHelper.loadData(activities, dataPersistenceObject)) {
             Platform.runLater(() -> {
                 activityTable.refresh();
@@ -140,6 +143,22 @@ public class MainController {
 
     private void setupTable() {
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        dateColumn.setCellFactory(col -> {
+            TableCell<Activity, Date> cell = new TableCell<Activity, Date>() {
+                @Override
+                protected void updateItem(Date item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if(empty) {
+                        setText(null);
+                    }
+                    else {
+                        setText(Activity.DATE_TIME_FORMAT.format(item));
+                    }
+                }
+            };
+            return cell;
+        });
+
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
         infoColumn.setCellValueFactory(new PropertyValueFactory<>("info"));
         setupInfoColumnCellFactory();
@@ -162,10 +181,6 @@ public class MainController {
             final TableHeaderRow header = (TableHeaderRow) activityTable.lookup("TableHeaderRow");
             header.reorderingProperty().addListener((observable1, oldValue, newValue) -> header.setReordering(false));
         });
-    }
-
-    private void loadSettings() {
-        if(Settings.loadSettings()) { setDataPersistenceOptionAccordingToSettings(); }
     }
 
     private void setDataPersistenceOptionAccordingToSettings() {

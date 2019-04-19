@@ -74,8 +74,8 @@ public class DatabaseStrategy implements DataPersistenceStrategy {
         ) {
 
             String createTableQuery = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME +
-                    " (date   VARCHAR(10)," +
-                    "  time   VARCHAR(10)," +
+                    " (date   DATE," +
+                    "  time   VARCHAR(5)," +
                     "  info   VARCHAR(200))";
             String truncateTableQuery = "TRUNCATE TABLE " + TABLE_NAME;
 
@@ -108,7 +108,7 @@ public class DatabaseStrategy implements DataPersistenceStrategy {
             try(ResultSet resultSet = statement.executeQuery(query)) {
                 while (resultSet.next()) {
                     observableList.add(new Activity(
-                            LocalDate.parse(resultSet.getString("date"), Activity.DATE_TIME_FORMATTER),
+                            LocalDate.parse(resultSet.getString("date")),
                             resultSet.getString("time"),
                             resultSet.getString("info")
                     ));

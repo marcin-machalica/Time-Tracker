@@ -52,7 +52,7 @@ public class TextFileStrategy implements DataPersistenceStrategy {
                     String[] activityFields = matcher.group().split(";");
                     try {
                         observableList.add(new Activity(
-                                LocalDate.parse(activityFields[0], Activity.DATE_TIME_FORMATTER),
+                                LocalDate.parse(activityFields[0]),
                                 activityFields[1],
                                 activityFields[2]
                         ));
