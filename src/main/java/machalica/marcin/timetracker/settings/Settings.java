@@ -2,10 +2,12 @@ package machalica.marcin.timetracker.settings;
 
 import javafx.application.Platform;
 import machalica.marcin.timetracker.helper.NotificationHelper;
+import org.apache.log4j.Logger;
 
 import java.io.*;
 
 public class Settings {
+    private static final Logger logger = Logger.getLogger(Settings.class);
     private static DataPersistenceOption dataPersistenceOption = DataPersistenceOption.TEXT_FILE;
     private static final String FINAL_FILE_NAME = "time_tracker_settings.ser";
 
@@ -15,7 +17,7 @@ public class Settings {
             save();
             isSaved = true;
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error(ex);
             NotificationHelper.showNotification(10, "Save error", "Error during saving settings", "/errornotification.png");
         } finally {
             return isSaved;
@@ -32,17 +34,17 @@ public class Settings {
             });
         } catch (FileNotFoundException ex) {
             Platform.runLater(() -> {
-                System.out.println(ex.getMessage());
+                logger.error(ex.getMessage());
                 NotificationHelper.showNotification(10, "Load error", ex.getMessage(), "/errornotification.png");
             });
         } catch (ClassNotFoundException ex) {
             Platform.runLater(() -> {
-                ex.printStackTrace();
+                logger.error(ex);
                 NotificationHelper.showNotification(10, "Load error", "Cannot load settings.", "/errornotification.png");
             });
         } catch (IOException ex) {
             Platform.runLater(() -> {
-                ex.printStackTrace();
+                logger.error(ex);
                 NotificationHelper.showNotification(10, "Load error", "Cannot load settings.", "/errornotification.png");
             });
         } finally {

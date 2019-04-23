@@ -23,6 +23,7 @@ import machalica.marcin.timetracker.model.ActivityEditHelper;
 import machalica.marcin.timetracker.model.DatePickerHelper;
 import machalica.marcin.timetracker.settings.DataPersistenceOption;
 import machalica.marcin.timetracker.settings.Settings;
+import org.apache.log4j.Logger;
 
 import java.sql.Date;
 import java.time.DateTimeException;
@@ -32,43 +33,26 @@ import static machalica.marcin.timetracker.datapersistence.DataHelper.getDataPer
 import static machalica.marcin.timetracker.datapersistence.DataHelper.getDataPersistenceObjectAccordingToSettings;
 
 public class MainController {
-    @FXML
-    private TableView activityTable;
-    @FXML
-    private TableColumn<Activity, Date> dateColumn;
-    @FXML
-    private TableColumn<Activity, String> timeColumn;
-    @FXML
-    private TableColumn<Activity, String> infoColumn;
-    @FXML
-    private TableColumn<Activity, Activity> actionButtonsColumn;
-    @FXML
-    private DatePicker dateInput;
-    @FXML
-    private TextField timeInput;
-    @FXML
-    private TextField infoInput;
-    @FXML
-    private Button addActivityButton;
-    @FXML
-    private Label warningLabel;
-    @FXML
-    private RadioMenuItem dataPersistenceOptionTextFile;
-    @FXML
-    private RadioMenuItem dataPersistenceOptionSerialization;
-    @FXML
-    private RadioMenuItem dataPersistenceOptionDatabase;
-    @FXML
-    private MenuItem saveDataMenuItem;
-    @FXML
-    private MenuItem loadDataMenuItem;
-    @FXML
-    private MenuItem exportCsvMenuItem;
-    @FXML
-    private MenuItem importCsvMenuItem;
-    @FXML
-    private MenuItem aboutMenuItem;
+    @FXML private TableView activityTable;
+    @FXML private TableColumn<Activity, Date> dateColumn;
+    @FXML private TableColumn<Activity, String> timeColumn;
+    @FXML private TableColumn<Activity, String> infoColumn;
+    @FXML private TableColumn<Activity, Activity> actionButtonsColumn;
+    @FXML private DatePicker dateInput;
+    @FXML private TextField timeInput;
+    @FXML private TextField infoInput;
+    @FXML private Button addActivityButton;
+    @FXML private Label warningLabel;
+    @FXML private RadioMenuItem dataPersistenceOptionTextFile;
+    @FXML private RadioMenuItem dataPersistenceOptionSerialization;
+    @FXML private RadioMenuItem dataPersistenceOptionDatabase;
+    @FXML private MenuItem saveDataMenuItem;
+    @FXML private MenuItem loadDataMenuItem;
+    @FXML private MenuItem exportCsvMenuItem;
+    @FXML private MenuItem importCsvMenuItem;
+    @FXML private MenuItem aboutMenuItem;
 
+    private static final Logger logger = Logger.getLogger(MainController.class);
     private ObservableList<Activity> activities = FXCollections.observableArrayList();
     private static DataPersistenceStrategy dataPersistenceObject;
 
@@ -137,7 +121,7 @@ public class MainController {
         setDataPersistenceMenuOptionAccordingToSettings();
 
         activityTable.setItems(activities);
-        System.out.println(dataPersistenceObject);
+        logger.debug(dataPersistenceObject);
         if(DataHelper.loadData(activities, dataPersistenceObject)) {
             Platform.runLater(() -> {
                 activityTable.refresh();

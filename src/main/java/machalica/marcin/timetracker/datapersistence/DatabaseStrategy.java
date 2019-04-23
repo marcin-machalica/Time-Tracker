@@ -11,9 +11,11 @@ import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
+import org.apache.log4j.Logger;
 import java.util.regex.Pattern;
 
 public class DatabaseStrategy implements DataPersistenceStrategy {
+    private static final Logger logger = Logger.getLogger(DatabaseStrategy.class);
     private static final DatabaseStrategy databaseStrategy = new DatabaseStrategy();
 
     private static final String USERNAME_PATTERN = "(?<=^USERNAME=)[a-zA-Z0-9]{1,15}$";
@@ -108,7 +110,7 @@ public class DatabaseStrategy implements DataPersistenceStrategy {
             connection.commit();
         } catch (SQLException ex) {
             if (connection != null) {
-                ex.printStackTrace();
+                logger.error(ex);
                 connection.rollback();
                 throw ex;
             }
@@ -128,7 +130,6 @@ public class DatabaseStrategy implements DataPersistenceStrategy {
                 Connection connection = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
                 PreparedStatement selectStatement = connection.prepareStatement(selectSQL)
         ) {
-            System.out.println(selectStatement); // DEBUG
             ObservableList<Activity> observableList = FXCollections.observableArrayList();
 
             try (ResultSet resultSet = selectStatement.executeQuery()) {
