@@ -5,12 +5,16 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import machalica.marcin.timetracker.helper.NotificationHelper;
 import machalica.marcin.timetracker.model.Activity;
+import machalica.marcin.timetracker.settings.DataPersistenceOption;
+import machalica.marcin.timetracker.settings.Settings;
+import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class DataHelper {
+    private static final Logger logger = Logger.getLogger(DataHelper.class);
     public static boolean saveData(ObservableList<Activity> activities, DataPersistenceStrategy dataPersistenceObject) {
         boolean isSaved = false;
         try {
@@ -18,17 +22,17 @@ public class DataHelper {
             NotificationHelper.showNotification(5, "Data saved","Successfully saved data to \n" + dataPersistenceObject.toString() + ".", "/saveicon.png");
             isSaved = true;
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error(ex);
             NotificationHelper.showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            logger.error(ex);
             NotificationHelper.showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
         } catch (SQLException ex) {
-            ex.printStackTrace();
-            System.out.println(ex.getNextException());
+            logger.error(ex);
+            logger.error(ex.getNextException());
             NotificationHelper.showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
         } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
+          logger.error(ex);
             NotificationHelper.showNotification(10, "Save error", "Error during saving data to \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
         } finally {
             return isSaved;
@@ -42,23 +46,24 @@ public class DataHelper {
             activitiesTemp = dataPersistenceObject.load();
         } catch (FileNotFoundException ex) {
             Platform.runLater(() -> {
-                System.out.println(ex.getMessage());
+                logger.error(ex.getMessage());
                 NotificationHelper.showNotification(10, "Load error", ex.getMessage(), "/errornotification.png");
             });
         } catch (IllegalArgumentException | IOException ex) {
             Platform.runLater(() -> {
-                ex.printStackTrace();
+                logger.error(ex.getMessage());
+                logger.error(ex);
                 NotificationHelper.showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
             });
         } catch (ClassNotFoundException ex) {
             Platform.runLater(() -> {
-                ex.printStackTrace();
+                logger.error(ex);
                 NotificationHelper.showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
             });
         } catch (SQLException ex) {
             Platform.runLater(() -> {
-                ex.printStackTrace();
-                System.out.println(ex.getNextException());
+                logger.error(ex);
+                logger.error(ex.getNextException());
                 NotificationHelper.showNotification(10, "Load error", "Error during loading data from \n" + dataPersistenceObject.toString() + ".", "/errornotification.png");
             });
         }
@@ -72,7 +77,7 @@ public class DataHelper {
         } else if(activitiesTemp != null && activitiesTemp.isEmpty()) {
             Platform.runLater(() -> {
                 String errorMsg = "No data found in \n" + dataPersistenceObject.toString() + ".";
-                System.out.println(errorMsg);
+                logger.error(errorMsg);
                 NotificationHelper.showNotification(10, "Load error", errorMsg, "/errornotification.png");
             });
         }
@@ -80,7 +85,7 @@ public class DataHelper {
     }
 
     public static boolean exportCsv(ObservableList<Activity> activities) {
-        CsvStrategy csvStrategy = new CsvStrategy();
+        DataPersistenceStrategy csvStrategy = getDataPersistenceObject(DataPersistenceOption.CSV);
         boolean isSaved = false;
 
         try {
@@ -88,7 +93,7 @@ public class DataHelper {
             NotificationHelper.showNotification(5, "Data exported","Successfully exported data to \n" + csvStrategy.toString() + ".", "/saveicon.png");
             isSaved = true;
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error(ex);
             NotificationHelper.showNotification(10, "Export error", "Error during exporting data to \n" + csvStrategy.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
         } catch (NullPointerException ex) { }
         finally {
@@ -97,7 +102,7 @@ public class DataHelper {
     }
 
     public static boolean importCsv(ObservableList<Activity> activities) {
-        CsvStrategy csvStrategy = new CsvStrategy();
+        CsvStrategy csvStrategy = CsvStrategy.getInstance();
         ObservableList<Activity> activitiesTemp = null;
         SimpleBooleanProperty isLoaded = new SimpleBooleanProperty(false);
 
@@ -105,12 +110,12 @@ public class DataHelper {
             activitiesTemp = csvStrategy.load();
         } catch (FileNotFoundException ex) {
             Platform.runLater(() -> {
-                System.out.println(ex.getMessage());
+                logger.error(ex.getMessage());
                 NotificationHelper.showNotification(10, "Import error", ex.getMessage(), "/errornotification.png");
             });
         } catch (IllegalArgumentException | IOException ex) {
             Platform.runLater(() -> {
-                ex.printStackTrace();
+                logger.error(ex);
                 NotificationHelper.showNotification(10, "Import error", "Error during importing data from \n" + csvStrategy.toString() + ".\n" + ex.getMessage(), "/errornotification.png");
             });
         }
@@ -124,10 +129,51 @@ public class DataHelper {
         } else if(activitiesTemp != null && activitiesTemp.isEmpty()) {
             Platform.runLater(() -> {
                 String errorMsg = "No data found in \n" + csvStrategy.toString() + ".";
-                System.out.println(errorMsg);
+                logger.error(errorMsg);
                 NotificationHelper.showNotification(10, "Import error", errorMsg, "/errornotification.png");
             });
         }
         return isLoaded.get();
+    }
+
+    public static DataPersistenceStrategy getDataPersistenceObjectAccordingToSettings() {
+        DataPersistenceStrategy dataPersistenceObject;
+
+        switch (Settings.getDataPersistenceOption()) {
+            case SERIALIZATION:
+                dataPersistenceObject = SerializationStrategy.getInstance();
+                break;
+            case DATABASE:
+                dataPersistenceObject = DatabaseStrategy.getInstance();
+                break;
+            case TEXT_FILE:
+            default:
+                dataPersistenceObject = TextFileStrategy.getInstance();
+                break;
+        }
+
+        return dataPersistenceObject;
+    }
+
+    public static DataPersistenceStrategy getDataPersistenceObject(DataPersistenceOption dataPersistenceOption) {
+        DataPersistenceStrategy dataPersistenceObject;
+
+        switch (dataPersistenceOption) {
+            case SERIALIZATION:
+                dataPersistenceObject = SerializationStrategy.getInstance();
+                break;
+            case DATABASE:
+                dataPersistenceObject = DatabaseStrategy.getInstance();
+                break;
+            case CSV:
+                dataPersistenceObject = CsvStrategy.getInstance();
+                break;
+            case TEXT_FILE:
+            default:
+                dataPersistenceObject = TextFileStrategy.getInstance();
+                break;
+        }
+
+        return dataPersistenceObject;
     }
 }

@@ -12,10 +12,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextFileStrategy implements DataPersistenceStrategy {
+    private static final TextFileStrategy textFileStrategy = new TextFileStrategy();
+
     private final String TEMP_FILE_NAME = "time_tracker_data_temp.txt";
     private final String FINAL_FILE_NAME = "time_tracker_data.txt";
     private final File tempFile = new File(TEMP_FILE_NAME);
     private final File finalFile = new File(FINAL_FILE_NAME);
+
+
+    private TextFileStrategy() { }
 
     @Override
     public void save(ObservableList<Activity> observableList) throws IOException {
@@ -52,7 +57,7 @@ public class TextFileStrategy implements DataPersistenceStrategy {
                     String[] activityFields = matcher.group().split(";");
                     try {
                         observableList.add(new Activity(
-                                LocalDate.parse(activityFields[0], Activity.DATE_TIME_FORMATTER),
+                                LocalDate.parse(activityFields[0]),
                                 activityFields[1],
                                 activityFields[2]
                         ));
@@ -65,6 +70,10 @@ public class TextFileStrategy implements DataPersistenceStrategy {
             }
             return observableList;
         } catch (FileNotFoundException ex) { throw new FileNotFoundException("Text File (" + FINAL_FILE_NAME + ") doesn't exist."); }
+    }
+
+    public static TextFileStrategy getInstance() {
+        return textFileStrategy;
     }
 
     @Override

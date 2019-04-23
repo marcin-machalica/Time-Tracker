@@ -3,49 +3,40 @@ package machalica.marcin.timetracker.datapersistence;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import machalica.marcin.timetracker.model.Activity;
-import machalica.marcin.timetracker.model.ActivitySerializationHelper;
 
 import java.io.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SerializationStrategy implements DataPersistenceStrategy {
+    private static final SerializationStrategy serializationStrategy = new SerializationStrategy();
     private final String FINAL_FILE_NAME = "time_tracker_data.ser";
 
+    private SerializationStrategy() { }
+
     @Override
-    public void save(ObservableList<Activity> observableList) throws IOException {
+    public void save(ObservableList<Activity> activities) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FINAL_FILE_NAME));
-        List<ActivitySerializationHelper> serializationHelperList = new ArrayList<>();
 
-        for(Activity activity : observableList) {
-            serializationHelperList.add(new ActivitySerializationHelper(
-                    activity.getDate(),
-                    activity.getTime(),
-                    activity.getInfo()
-            ));
-        }
-
-        oos.writeObject(serializationHelperList);
+        oos.writeObject(new ArrayList<>(activities));
         oos.close();
     }
 
     @Override
     public ObservableList<Activity> load() throws IOException, ClassNotFoundException {
-        ObservableList<Activity> observableList = FXCollections.observableArrayList();
-        try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FINAL_FILE_NAME))) {
-            List<ActivitySerializationHelper> ashList = (ArrayList<ActivitySerializationHelper>) ois.readObject();
+        ObservableList<Activity> activities;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FINAL_FILE_NAME))) {
+            List<Activity> activityList = (ArrayList<Activity>) ois.readObject();
+            activities = FXCollections.observableList(activityList);
+        } catch (FileNotFoundException ex) {
+            throw new FileNotFoundException("Serialized Data File (" + FINAL_FILE_NAME + ") doesn't exist.");
+        }
 
-            for (ActivitySerializationHelper ash : ashList) {
-                observableList.add(new Activity(
-                        LocalDate.parse(ash.getDate(), Activity.DATE_TIME_FORMATTER),
-                        ash.getTime(),
-                        ash.getInfo()
-                ));
-            }
-        } catch (FileNotFoundException ex) { throw new FileNotFoundException("Serialized Data File (" + FINAL_FILE_NAME + ") doesn't exist."); }
+        return activities;
+    }
 
-        return observableList;
+    public static SerializationStrategy getInstance() {
+        return serializationStrategy;
     }
 
     @Override

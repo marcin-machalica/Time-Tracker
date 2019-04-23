@@ -22,8 +22,8 @@ public class NotificationHelper {
                 .text(text)
                 .graphic(new ImageView(img))
                 .hideAfter(Duration.seconds(duration))
-                .position(Pos.BOTTOM_RIGHT);
-        notificationBuilder.darkStyle();
+                .position(Pos.BOTTOM_RIGHT)
+                .darkStyle();
         notificationBuilder.show();
     }
 }

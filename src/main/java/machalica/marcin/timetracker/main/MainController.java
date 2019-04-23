@@ -23,48 +23,36 @@ import machalica.marcin.timetracker.model.ActivityEditHelper;
 import machalica.marcin.timetracker.model.DatePickerHelper;
 import machalica.marcin.timetracker.settings.DataPersistenceOption;
 import machalica.marcin.timetracker.settings.Settings;
+import org.apache.log4j.Logger;
 
+import java.sql.Date;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 
-public class MainController {
-    @FXML
-    private TableView activityTable;
-    @FXML
-    private TableColumn<Activity, String> dateColumn;
-    @FXML
-    private TableColumn<Activity, String> timeColumn;
-    @FXML
-    private TableColumn<Activity, String> infoColumn;
-    @FXML
-    private TableColumn<Activity, Activity> actionButtonsColumn;
-    @FXML
-    private DatePicker dateInput;
-    @FXML
-    private TextField timeInput;
-    @FXML
-    private TextField infoInput;
-    @FXML
-    private Button addActivityButton;
-    @FXML
-    private Label warningLabel;
-    @FXML
-    private RadioMenuItem dataPersistenceOptionTextFile;
-    @FXML
-    private RadioMenuItem dataPersistenceOptionSerialization;
-    @FXML
-    private RadioMenuItem dataPersistenceOptionDatabase;
-    @FXML
-    private MenuItem saveDataMenuItem;
-    @FXML
-    private MenuItem loadDataMenuItem;
-    @FXML
-    private MenuItem exportCsvMenuItem;
-    @FXML
-    private MenuItem importCsvMenuItem;
-    @FXML
-    private MenuItem aboutMenuItem;
+import static machalica.marcin.timetracker.datapersistence.DataHelper.getDataPersistenceObject;
+import static machalica.marcin.timetracker.datapersistence.DataHelper.getDataPersistenceObjectAccordingToSettings;
 
+public class MainController {
+    @FXML private TableView activityTable;
+    @FXML private TableColumn<Activity, Date> dateColumn;
+    @FXML private TableColumn<Activity, String> timeColumn;
+    @FXML private TableColumn<Activity, String> infoColumn;
+    @FXML private TableColumn<Activity, Activity> actionButtonsColumn;
+    @FXML private DatePicker dateInput;
+    @FXML private TextField timeInput;
+    @FXML private TextField infoInput;
+    @FXML private Button addActivityButton;
+    @FXML private Label warningLabel;
+    @FXML private RadioMenuItem dataPersistenceOptionTextFile;
+    @FXML private RadioMenuItem dataPersistenceOptionSerialization;
+    @FXML private RadioMenuItem dataPersistenceOptionDatabase;
+    @FXML private MenuItem saveDataMenuItem;
+    @FXML private MenuItem loadDataMenuItem;
+    @FXML private MenuItem exportCsvMenuItem;
+    @FXML private MenuItem importCsvMenuItem;
+    @FXML private MenuItem aboutMenuItem;
+
+    private static final Logger logger = Logger.getLogger(MainController.class);
     private ObservableList<Activity> activities = FXCollections.observableArrayList();
     private static DataPersistenceStrategy dataPersistenceObject;
 
@@ -127,9 +115,13 @@ public class MainController {
 
     private void setupSettingsAndData() {
         setupShortcuts();
-        loadSettings();
+        Settings.loadSettings();
+
+        dataPersistenceObject = getDataPersistenceObjectAccordingToSettings();
+        setDataPersistenceMenuOptionAccordingToSettings();
 
         activityTable.setItems(activities);
+        logger.debug(dataPersistenceObject);
         if(DataHelper.loadData(activities, dataPersistenceObject)) {
             Platform.runLater(() -> {
                 activityTable.refresh();
@@ -140,6 +132,22 @@ public class MainController {
 
     private void setupTable() {
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        dateColumn.setCellFactory(col -> {
+            TableCell<Activity, Date> cell = new TableCell<Activity, Date>() {
+                @Override
+                protected void updateItem(Date item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if(empty) {
+                        setText(null);
+                    }
+                    else {
+                        setText(Activity.DATE_TIME_FORMAT.format(item));
+                    }
+                }
+            };
+            return cell;
+        });
+
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
         infoColumn.setCellValueFactory(new PropertyValueFactory<>("info"));
         setupInfoColumnCellFactory();
@@ -164,23 +172,16 @@ public class MainController {
         });
     }
 
-    private void loadSettings() {
-        if(Settings.loadSettings()) { setDataPersistenceOptionAccordingToSettings(); }
-    }
-
-    private void setDataPersistenceOptionAccordingToSettings() {
-        switch (Settings.getDataPersistenceDefaultOption()) {
+    private void setDataPersistenceMenuOptionAccordingToSettings() {
+        switch (Settings.getDataPersistenceOption()) {
             case SERIALIZATION:
-                dataPersistenceObject = new SerializationStrategy();
                 Platform.runLater(() -> dataPersistenceOptionSerialization.setSelected(true));
                 break;
             case DATABASE:
-                dataPersistenceObject = new DatabaseStrategy();
                 Platform.runLater(() -> dataPersistenceOptionDatabase.setSelected(true));
                 break;
             case TEXT_FILE:
             default:
-                dataPersistenceObject = new TextFileStrategy();
                 Platform.runLater(() -> dataPersistenceOptionTextFile.setSelected(true));
                 break;
         }
@@ -198,18 +199,18 @@ public class MainController {
 
     private void setupDataPersistenceOptionMenuItemsOnAction() {
         dataPersistenceOptionTextFile.setOnAction(e -> Platform.runLater(() -> {
-            dataPersistenceObject = new TextFileStrategy();
-            Settings.setDataPersistenceDefaultOption(DataPersistenceOption.TEXT_FILE);
+            dataPersistenceObject = getDataPersistenceObject(DataPersistenceOption.TEXT_FILE);
+            Settings.setDataPersistenceOption(DataPersistenceOption.TEXT_FILE);
             Settings.saveSettings();
         }));
         dataPersistenceOptionSerialization.setOnAction(e -> Platform.runLater(() -> {
-            dataPersistenceObject = new SerializationStrategy();
-            Settings.setDataPersistenceDefaultOption(DataPersistenceOption.SERIALIZATION);
+            dataPersistenceObject = getDataPersistenceObject(DataPersistenceOption.SERIALIZATION);
+            Settings.setDataPersistenceOption(DataPersistenceOption.SERIALIZATION);
             Settings.saveSettings();
         }));
         dataPersistenceOptionDatabase.setOnAction(e -> Platform.runLater(() -> {
-            dataPersistenceObject = new DatabaseStrategy();
-            Settings.setDataPersistenceDefaultOption(DataPersistenceOption.DATABASE);
+            dataPersistenceObject = getDataPersistenceObject(DataPersistenceOption.DATABASE);
+            Settings.setDataPersistenceOption(DataPersistenceOption.DATABASE);
             Settings.saveSettings();
         }));
     }
