@@ -26,6 +26,7 @@
                   <MenuItem fx:id="loadDataMenuItem" mnemonicParsing="false" text="Load" />
                   <MenuItem fx:id="exportCsvMenuItem" mnemonicParsing="false" text="Export CSV" />
                   <MenuItem fx:id="importCsvMenuItem" mnemonicParsing="false" text="Import CSV" />
+                  <MenuItem fx:id="openSummaryMenuItem" mnemonicParsing="false" text="Summary" />
                   <Menu mnemonicParsing="false" text="Save/Load method">
                      <items>
                         <RadioMenuItem fx:id="dataPersistenceOptionTextFile" mnemonicParsing="false" text="Text File">

@@ -8,6 +8,10 @@
     -fx-cursor: hand;
 }
 
+.choice-box {
+    -fx-cursor: hand;
+}
+
 /* menu */
 .menu, .menu-item {
     -fx-cursor: hand;
@@ -30,6 +34,7 @@
 .menu:hover, .menu:focused, .menu:showing,
 .menu-item:hover, .menu-item:focused {
     -fx-background-color: #b91d47;
+    -fx-mark-color: #b91d47;
 }
 
 .context-menu {
@@ -103,7 +108,7 @@
     -fx-background-color: transparent;
 }
 
-.text-field {
+.text-field, #dateOptionChoiceBox {
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-opacity: 0.7;
@@ -126,7 +131,8 @@
 }
 
 #addActivityButton, .save-button,
-.cancel-button, .discard-button {
+.cancel-button, .discard-button,
+#generatePdfButton, #sendEmailButton {
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-opacity: 0.7;
@@ -142,7 +148,8 @@
 #addActivityButton:focused, #addActivityButton:hover,
 .save-button:focused, .save-button:hover,
 .cancel-button:focused, .cancel-button:hover,
-.discard-button:focused, .discard-button:hover {
+.discard-button:focused, .discard-button:hover,
+#generatePdfButton, #sendEmailButton {
     -fx-opacity: 0.8;
     -fx-padding: 5 20 5 20;
     -fx-border-insets: 5;
@@ -191,3 +198,61 @@
     -fx-text-fill: #ffffff;
     -fx-opacity: 0.7;
 }
+
+#dateOptionChoiceBox > .label {
+    -fx-text-fill: white; }
+}
+
+#dateOptionChoiceBox .menu-item > .label {
+    -fx-text-fill: white; -fx-opacity: 0.5
+}
+#dateOptionChoiceBox .menu-item:focused > .label {
+    -fx-text-fill: white; -fx-opacity: 0.9
+}
+
+#dateOptionChoiceBox {
+  -fx-mark-color: #404040;
+  -fx-padding: 3px;
+}
+
+#dateOptionChoiceBox:focused {
+  -fx-padding: 0;
+  -fx-border-color: #ee1111;
+  -fx-mark-color: #b91d47;
+}
+
+#generatePdfButton, #sendEmailButton {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: transparent;
+    -fx-border-color: #606060;
+}
+
+#generatePdfButton:focused, #generatePdfButton:hover,
+#sendEmailButton:focused, #sendEmailButton:hover {
+    -fx-background-color: #606060;
+    -fx-border-color: #707070;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: #808080;
+}
+.chart-horizontal-grid-lines {
+    -fx-stroke: #808080;
+}
+
+.axis {
+    -fx-tick-label-fill: rgba(255,255,255,0.7);
+}
+
+.axis:left {
+    -fx-border-color: transparent #808080 transparent transparent;
+}
+
+.axis:bottom {
+    -fx-border-color: #808080 transparent transparent;
+}
+

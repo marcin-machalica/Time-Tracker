@@ -28,6 +28,14 @@ public class ShorthandSyntaxHelper {
         }));
     }
 
+    public static void setupDateShorthandSyntaxListener(DatePicker dateInput) {
+        dateInput.focusedProperty().addListener(((observable, oldValue, newValue) -> {
+            if(!newValue) {
+                ShorthandSyntaxHelper.computeDatePicker(dateInput);
+            }
+        }));
+    }
+
     public static void computeActivityInputs(DatePicker dateInput, TextField timeInput, TextField infoInput) {
         computeDatePicker(dateInput);
         computeTimeInput(timeInput);
