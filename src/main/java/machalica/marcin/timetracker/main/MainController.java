@@ -6,6 +6,9 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
@@ -14,7 +17,10 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import machalica.marcin.timetracker.datapersistence.*;
+import machalica.marcin.timetracker.datasummary.DataSummaryController;
 import machalica.marcin.timetracker.helper.AboutHelper;
 import machalica.marcin.timetracker.helper.ExitHelper;
 import machalica.marcin.timetracker.helper.ShorthandSyntaxHelper;
@@ -25,6 +31,7 @@ import machalica.marcin.timetracker.settings.DataPersistenceOption;
 import machalica.marcin.timetracker.settings.Settings;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.time.DateTimeException;
 import java.time.LocalDate;
@@ -50,6 +57,7 @@ public class MainController {
     @FXML private MenuItem loadDataMenuItem;
     @FXML private MenuItem exportCsvMenuItem;
     @FXML private MenuItem importCsvMenuItem;
+    @FXML private MenuItem openSummaryMenuItem;
     @FXML private MenuItem aboutMenuItem;
 
     private static final Logger logger = Logger.getLogger(MainController.class);
@@ -233,6 +241,30 @@ public class MainController {
                     activityTable.refresh();
                     activityTable.scrollTo(activities.size());
                 });
+            }
+        });
+
+        openSummaryMenuItem.setOnAction(e -> {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/DataSummary.fxml"));
+                Parent root = fxmlLoader.load();
+                Stage stage = new Stage();
+                stage.setTitle("Summary");
+
+                Scene scene = new Scene(root, 800, 600);
+                stage.setMinWidth(800);
+                stage.setMinHeight(600);
+                scene.getStylesheets().add("dark-theme.css");
+
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setScene(scene);
+
+                DataSummaryController controller = fxmlLoader.getController();
+                controller.setActivities(activities);
+
+                stage.show();
+            } catch (IOException ex) {
+                logger.error(ex);
             }
         });
 
